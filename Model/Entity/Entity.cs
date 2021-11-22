@@ -84,7 +84,8 @@ namespace SRLCore.Model
         /// eg: public void Configure(EntityTypeBuilder<User> builder){
         /// </summary>
         [NotMapped]
-        public virtual Action<EntityTypeBuilder<User<Tstatus>>> config { get; }
+        public virtual Action<EntityTypeBuilder<User<Tstatus>>> config => builder =>
+            builder.Property(e => e.mobile).HasMaxLength(11).IsFixedLength(); 
 
         public class UserConfiguration : IEntityTypeConfiguration<User<Tstatus>>
         {
