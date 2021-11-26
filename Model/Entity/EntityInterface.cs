@@ -12,40 +12,37 @@ namespace SRLCore.Model
     public interface IDbContext
     {
         void RestrinctDeleteBehavior(ModelBuilder modelBuilder);
-
     }
-    public interface ICommonProperty<Tstatus>
+
+    public interface ICommonProperty
     {
         long id { get; set; }
         long creator_id { get; set; }
         long? modifier_id { get; set; }
         DateTime create_date { get; set; }
         DateTime? modify_date { get; set; }
-        Tstatus status { get; set; }
+        string status { get; set; }
 
     }
-    public interface ICommonProperty : ICommonProperty<string> { }
-    public interface IUserRole<Tstatus> : ICommonProperty<Tstatus>
+    public interface IUserRole<TUser, TRole> : ICommonProperty
     {
         long user_id { get; set; }
-        IUser<Tstatus> user { get; set; }
+        TUser user { get; set; }
         long role_id { get; set; }
-        IRole<Tstatus> role { get; set; }
+        TRole role { get; set; }
 
     }
-    public interface IUserRole : IUserRole<string> { }
-    public interface IRole<Tstatus> : ICommonProperty<Tstatus>
+    public interface IRole<TUserRole> : ICommonProperty
     {
-        ICollection<IUserRole<Tstatus>> user_roles { get; set; }
+        ICollection<TUserRole> user_roles { get; set; }
         string name { get; set; }
         string accesses { get; set; }
 
     }
-    public interface IRole : IRole<string> { }
-    public interface IUser<Tstatus> : ICommonProperty<Tstatus>
+    public interface IUserProp : ICommonProperty
     {
 
-        ICollection<IUserRole<Tstatus>> user_roles { get; set; }
+        string username { get; set; }
         string first_name { get; set; }
         string last_name { get; set; }
         string mobile { get; set; }
@@ -58,46 +55,46 @@ namespace SRLCore.Model
         string full_name { get; }
 
     }
-    public interface IUser : IUser<string> { }
+
+    public interface IUser<TUserRole> : IUserProp
+    {
+        ICollection<TUserRole> user_roles { get; set; }
+    }
 
     /// <summary>
     /// for static instance add this to driven class:   public static IUserSession<Tstatus> Instance => new UserSession<Tstatus>();
     /// </summary> 
-    public interface IUserSession<Tstatus>
+    public interface IUserSession<TUser>
     {
         long Id { get; set; }
         List<string> Accesses { get; set; }
-        IUser<Tstatus> UserData { get; set; }
+        TUser UserData { get; set; }
         void SetAccesses(DbContext _context);
         /// <summary>
         /// return _context.UserRoles.Where(x => x.user_id == Id).Include(x => x.role).Select(x => x.role.accesses).ToList();
         /// </summary>
         GetAllAccess get_all_access { get; }
-        Func<IUser<Tstatus>, object> SessionFields { get;  }
-        Dictionary<string, object> Session { get; } 
+        Func<TUser, object> SessionFields { get; }
+        Dictionary<string, object> Session { get; }
 
     }
-    public interface IUserSession : IUserSession<string> { }
-    public interface IBaseInfo<TBaseKind, Tstatus> :  ICommonProperty<Tstatus>
+    public interface IBaseInfo<TBaseKind> : ICommonProperty
     {
-        TBaseKind kind { get; set; } 
+        TBaseKind kind { get; set; }
         string title { get; set; }
-        bool? is_default { get; set; }   
+        bool? is_default { get; set; }
     }
-    public interface IBaseInfo<TBaseKind> : IBaseInfo<TBaseKind,string> { }
-    public interface ICity<Tstatus> : ICommonProperty<Tstatus>
+    public interface ICity<TProvince> : ICommonProperty
     {
         long province_id { get; set; }
-        IProvince<Tstatus> province { get; set; } 
+        TProvince province { get; set; }
         string title { get; set; }
         string province_title { get; }
 
     }
-    public interface ICity : ICity<string> { }
-    public interface IProvince<Tstatus> : ICommonProperty<Tstatus>
+    public interface IProvince<TCity> : ICommonProperty
     {
-        ICollection<ICity<Tstatus>> cities { get; set; } 
-         string title { get; set; }
+        ICollection<TCity> cities { get; set; }
+        string title { get; set; }
     }
-    public interface IProvince : IProvince<string> { }
 }

@@ -9,20 +9,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace SRLCore.Model
 {
-    public class SrlDbContext<TDb> : DbContext, IDbContext where TDb : DbContext
+    public abstract class DbEntity<TDb> : DbContext, IDbContext where TDb : DbContext
     {
-        public SrlDbContext(DbContextOptions<TDb> options)
-          : base(options)
+        public DbEntity(DbContextOptions<TDb> options)
+         : base(options)
         {
 
-        }
-        public virtual void RestrinctDeleteBehavior(ModelBuilder modelBuilder)
-        {
-
-            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
-            {
-                relationship.DeleteBehavior = DeleteBehavior.Restrict;//.OnDelete(DeleteBehavior.Cascade);
-            }
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -30,41 +22,81 @@ namespace SRLCore.Model
 
             optionsBuilder.EnableSensitiveDataLogging();
         }
-    }
-    public abstract class CommonProperty<Tstatus> : ICommonProperty<Tstatus>
+        /// <summary>
+        /// (builder.Property(e => e.mobile), 11)
+        /// </summary>
+        public static void ColumnFixedLenght<Tprop>(PropertyBuilder<Tprop> pb, int length) => pb.HasMaxLength(length).IsFixedLength();
+        /// <summary>
+        /// (builder.HasIndex(p => p.username))
+        /// </summary>
+        public static void ColumnUnique(IndexBuilder ib) => ib.IsUnique();
+
+
+        public virtual void RestrinctDeleteBehavior(ModelBuilder modelBuilder)
+        {
+            foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
+            {
+                relationship.DeleteBehavior = DeleteBehavior.Restrict;
+            }
+        }
+    } 
+    public abstract class CommonProperty<TUser> : ICommonProperty
     {
         [Key]
         public virtual long id { get; set; }
-        public virtual long creator_id { get; set; } = UserSession.user_session.Id;
+        public virtual long creator_id { get; set; } = UserSession<TUser>.user_session.Id;
         public virtual long? modifier_id { get; set; }
         public virtual DateTime create_date { get; set; } = DateTime.Now;
         public virtual DateTime? modify_date { get; set; }
-        public virtual Tstatus status { get; set; }
-    }
-    public abstract class CommonProperty : CommonProperty<string> { }
-    public class Role<Tstatus> : CommonProperty<Tstatus>, IRole<Tstatus>
+        public virtual string status { get; set; }
+    } 
 
+    public abstract class CommonPropertyConfigurable<TEntity, TUser> : CommonProperty<TUser>
+    where TEntity : class
     {
-        public virtual ICollection<IUserRole<Tstatus>> user_roles { get; set; }
+        /// <summary>
+        /// eg: public void Configure(EntityTypeBuilder<User> builder){
+        /// </summary> 
+        public static Action<EntityTypeBuilder<TEntity>> config { get; }
+
+        public class EntityConfiguration : IEntityTypeConfiguration<TEntity>
+        {
+            Action<EntityTypeBuilder<TEntity>> configuration;
+            public EntityConfiguration(Action<EntityTypeBuilder<TEntity>> config_)
+            {
+                configuration = config_;
+            }
+            public void Configure(EntityTypeBuilder<TEntity> builder)
+            {
+                configuration(builder);
+            }
+        }
+    }
+
+    public abstract class Role<TUserRole, TUser> : CommonPropertyConfigurable<Role<TUserRole, TUser>, TUser>, IRole<TUserRole>
+    {
+        public virtual ICollection<TUserRole> user_roles { get; set; }
         [Required]
         public virtual string name { get; set; }
         [Required]
         public virtual string accesses { get; set; }
+        public static new Action<EntityTypeBuilder<Role<TUserRole, TUser>>> config => builder =>
+            DbEntity<DbContext>.ColumnUnique(builder.HasIndex(e => e.name));
     }
-    public class Role : Role<string> { }
 
-    public class UserRole<Tstatus> : CommonProperty<Tstatus>, IUserRole<Tstatus>
+    public abstract class UserRole<TUser, TRole> : CommonProperty<TUser>, IUserRole<TUser, TRole>
     {
         public virtual long user_id { get; set; }
-        public virtual IUser<Tstatus> user { get; set; }
+        public virtual TUser user { get; set; }
         public virtual long role_id { get; set; }
-        public virtual IRole<Tstatus> role { get; set; }
+        public virtual TRole role { get; set; }
     }
-    public class UserRole : UserRole<string> { }
-    public class User<Tstatus> : CommonProperty<Tstatus>, IUser<Tstatus>
+    public abstract class User<TUserRole, TUser> : CommonPropertyConfigurable<User<TUserRole, TUser>, TUser>, IUser<TUserRole>
     {
 
-        public virtual ICollection<IUserRole<Tstatus>> user_roles { get; set; }
+        public virtual ICollection<TUserRole> user_roles { get; set; }
+        [Required]
+        public virtual string username { get; set; }
         [Required]
         public virtual string first_name { get; set; }
         [Required]
@@ -80,50 +112,24 @@ namespace SRLCore.Model
         [NotMapped]
         public string full_name { get => $"{first_name} {last_name}"; }
 
-        /// <summary>
-        /// eg: public void Configure(EntityTypeBuilder<User> builder){
-        /// </summary>
-        [NotMapped]
-        public virtual Action<EntityTypeBuilder<User<Tstatus>>> config => builder =>
-            builder.Property(e => e.mobile).HasMaxLength(11).IsFixedLength(); 
-
-        public class UserConfiguration : IEntityTypeConfiguration<User<Tstatus>>
-        {
-            User<Tstatus> User;
-            public UserConfiguration(User<Tstatus> user_) { User = user_; }
-            public void Configure(EntityTypeBuilder<User<Tstatus>> builder)
-            {
-                Action<EntityTypeBuilder<User<Tstatus>>> user_config = User.config;
-                if (user_config != null) User.config(builder);
-            }
-        }
+        public static new Action<EntityTypeBuilder<User<TUserRole, TUser>>> config => builder =>
+         DbEntity<DbContext>.ColumnFixedLenght(builder.Property(e => e.mobile), 11);
     }
-    public class User : User<string> { }
-    public class UserSession<Tstatus> : IUserSession<Tstatus>
+
+    public abstract class UserSession<TUser> : IUserSession<TUser> 
     {
         public virtual long Id { get; set; }
         public virtual List<string> Accesses { get; set; }
-        public virtual IUser<Tstatus> UserData { get; set; }
+        public virtual TUser UserData { get; set; }
         public virtual GetAllAccess get_all_access { get; }
-        public virtual Func<IUser<Tstatus>, object> SessionFields =>
-            x => new
-            {
-                x.id,
-                x.first_name,
-                x.last_name,
-                x.create_date,
-                x.full_name,
-                x.mobile
-            };
-        public virtual Dictionary<string, object> Session =>
-                            new Dictionary<string, object>
-                            {
-                                [nameof(Id)] = Id,
-                                [nameof(Accesses)] = Accesses,
-                                [nameof(UserData)] = new List<IUser<Tstatus>> { UserData }
-                        .Select(x => SessionFields(x)).First()
-                            };
-
+        /// <summary>
+        ///  => x => new { x.id, x.first_name, x.last_name, x.create_date, x.full_name, x.mobile };
+        /// </summary>
+        public abstract Func<TUser, object> SessionFields { get; }
+        /// <summary>
+        /// => new Dictionary<string, object>{[nameof(Id)] = Id,[nameof(Accesses)] = Accesses,[nameof(UserData)] = new List<TUser> { UserData}.Select(x => SessionFields(x)).First()};
+        /// </summary>
+        public abstract Dictionary<string, object> Session { get;  }
         /// <summary>
         /// set Accesses property
         /// </summary>
@@ -135,12 +141,11 @@ namespace SRLCore.Model
             all_access.ForEach(x => accesses.AddRange(x.Split(",").ToList()));
             Accesses = accesses.Distinct().ToList();
         }
-        public static IUserSession<Tstatus> user_session => new UserSession<Tstatus>();
+        public static UserSession<TUser> user_session { get; }
 
     }
-    public class UserSession : UserSession<string> { }
 
-    public class BaseInfo<BaseKind, Tstatus> : CommonProperty<Tstatus>, IBaseInfo<BaseKind, Tstatus>
+    public abstract class BaseInfo<BaseKind, TUser> : CommonProperty<TUser>, IBaseInfo<BaseKind>
     {
         [Required]
         public virtual BaseKind kind { get; set; }
@@ -148,18 +153,18 @@ namespace SRLCore.Model
         public virtual string title { get; set; }
         public virtual bool? is_default { get; set; }
     }
-    public class City<Tstatus> : CommonProperty<Tstatus>, ICity<Tstatus>
+    public abstract class City<TProvince, TUser> : CommonProperty<TUser>, ICity<TProvince> where TProvince : IProvince<TProvince>
     {
         public virtual long province_id { get; set; }
-        public virtual IProvince<Tstatus> province { get; set; }
+        public virtual TProvince province { get; set; }
         [Required]
         public virtual string title { get; set; }
         [NotMapped]
         public virtual string province_title => province?.title;
     }
-    public class Province<Tstatus> : CommonProperty<Tstatus>, IProvince<Tstatus>
+    public abstract class Province<TCity, TUser> : CommonProperty<TUser>, IProvince<TCity>
     {
-        public virtual ICollection<ICity<Tstatus>> cities { get; set; }
+        public virtual ICollection<TCity> cities { get; set; }
         [Required]
         public virtual string title { get; set; }
     }
