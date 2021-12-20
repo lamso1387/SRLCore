@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\SRL\SRL\SRL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Reference Include="Microsoft.EntityFrameworkCore">
       <HintPath>..\..\SRL\SRL\my_reference\.NetCore\Microsoft.EntityFrameworkCore.dll</HintPath>
     </Reference>

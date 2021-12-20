@@ -12,11 +12,12 @@ namespace SRLCore.Model
     public interface IDbContext
     {
         void RestrinctDeleteBehavior(ModelBuilder modelBuilder);
+        void ModelCreator(ModelBuilder modelBuilder);
     }
 
     public interface ICommonProperty
     {
-        long id { get; set; }
+        long id { get; set; } 
         long creator_id { get; set; }
         long? modifier_id { get; set; }
         DateTime create_date { get; set; }
@@ -24,22 +25,19 @@ namespace SRLCore.Model
         string status { get; set; }
 
     }
-    public interface IUserRole<TUser, TRole> : ICommonProperty
+    public interface IUserRole : ICommonProperty
     {
         long user_id { get; set; }
-        TUser user { get; set; }
         long role_id { get; set; }
-        TRole role { get; set; }
 
     }
-    public interface IRole<TUserRole> : ICommonProperty
+    public interface IRole : ICommonProperty
     {
-        ICollection<TUserRole> user_roles { get; set; }
         string name { get; set; }
         string accesses { get; set; }
 
     }
-    public interface IUserProp : ICommonProperty
+    public interface IUser : ICommonProperty
     {
 
         string username { get; set; }
@@ -53,48 +51,29 @@ namespace SRLCore.Model
         ///implementation: { get => $"{first_name} {last_name}"; }
         /// </summary>
         string full_name { get; }
+        bool? change_pass_next_login { get; set; }
+        DateTime? last_login { get; set; }
+
+
 
     }
 
-    public interface IUser<TUserRole> : IUserProp
-    {
-        ICollection<TUserRole> user_roles { get; set; }
-    }
 
-    /// <summary>
-    /// for static instance add this to driven class:   public static IUserSession<Tstatus> Instance => new UserSession<Tstatus>();
-    /// </summary> 
-    public interface IUserSession<TUser>
-    {
-        long Id { get; set; }
-        List<string> Accesses { get; set; }
-        TUser UserData { get; set; }
-        void SetAccesses(DbContext _context);
-        /// <summary>
-        /// return _context.UserRoles.Where(x => x.user_id == Id).Include(x => x.role).Select(x => x.role.accesses).ToList();
-        /// </summary>
-        GetAllAccess get_all_access { get; }
-        Func<TUser, object> SessionFields { get; }
-        Dictionary<string, object> Session { get; }
-
-    }
     public interface IBaseInfo<TBaseKind> : ICommonProperty
     {
         TBaseKind kind { get; set; }
         string title { get; set; }
         bool? is_default { get; set; }
     }
-    public interface ICity<TProvince> : ICommonProperty
+    public interface ICity : ICommonProperty
     {
-        long province_id { get; set; }
-        TProvince province { get; set; }
+        long province_id { get; set; } 
         string title { get; set; }
         string province_title { get; }
 
     }
-    public interface IProvince<TCity> : ICommonProperty
-    {
-        ICollection<TCity> cities { get; set; }
+    public interface IProvince : ICommonProperty
+    { 
         string title { get; set; }
     }
 }
