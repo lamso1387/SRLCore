@@ -63,4 +63,15 @@ namespace SRLCore.Model
             //MyData=0, 
 
         }
+
+
+    public class EnumConvert
+    {
+        public static T StringToEnum<T>(string str)
+        {
+            return SRL.Convertor.StringToEnum<T>(str);
+        }
+
     }
+
+}

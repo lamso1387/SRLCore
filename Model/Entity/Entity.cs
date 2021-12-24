@@ -6,11 +6,16 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Microsoft.AspNetCore.Http;
+using SRLCore.Middleware;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace SRLCore.Model
 {
     public abstract class DbEntity<TDb> : DbContext, IDbContext where TDb : DbContext
     {
+
         public DbEntity(DbContextOptions<TDb> options)
          : base(options)
         {
@@ -19,7 +24,7 @@ namespace SRLCore.Model
         public abstract void ModelCreator(ModelBuilder modelBuilder);
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            ModelCreator(modelBuilder); 
+            ModelCreator(modelBuilder);
             base.OnModelCreating(modelBuilder);
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -31,11 +36,11 @@ namespace SRLCore.Model
         /// <summary>
         /// (builder.Property(e => e.mobile), 11)
         /// </summary>
-        public static void ColumnFixedLenght<Tprop>(PropertyBuilder<Tprop> pb, int length) => pb.HasMaxLength(length).IsFixedLength();
+        public void ColumnFixedLenght<Tprop>(PropertyBuilder<Tprop> pb, int length) => pb.HasMaxLength(length).IsFixedLength();
         /// <summary>
         /// (builder.HasIndex(p => p.username))
         /// </summary>
-        public static void ColumnUnique(IndexBuilder ib) => ib.IsUnique(); 
+        public void ColumnUnique(IndexBuilder ib) => ib.IsUnique();
 
 
         public virtual void RestrinctDeleteBehavior(ModelBuilder modelBuilder)
@@ -46,6 +51,42 @@ namespace SRLCore.Model
             }
         }
     }
+    public abstract class DbEntity<TDb, TUser, TRole, TUserRole> : DbEntity<TDb>, IDbContext<TUser, TRole, TUserRole>
+        where TDb : DbContext
+        where TUser : IUser where TRole : class where TUserRole : class
+    {
+        public virtual DbSet<TUser> Users { get; set; }
+        public virtual DbSet<TRole> Roles { get; set; }
+        public virtual DbSet<TUserRole> UserRoles { get; set; }
+
+        public DbEntity(DbContextOptions<TDb> options)
+         : base(options)
+        {
+
+        }
+
+        public virtual IQueryable<TUser> GetUsers(long? id = null)
+        {
+            var query = Users.AsQueryable();
+
+            if (id.HasValue)
+                query = query.Where(item => item.id == id);
+
+            query = query.FilterNonActionAccess(nameof(IUser.id), null);
+
+            return query;
+        }
+        public virtual IQueryable<TUser> GetUsers(SearchUserRequest request)
+        {
+            return GetUsers(request.id);
+
+        }
+        public virtual async Task<TUser> GetUser(long id, string username)
+        => await Users.FilterNonActionAccess(nameof(IUser.id), null).FirstOrDefaultAsync(item => item.id == id || (item.username == username));
+       
+
+
+    }
     /// <summary>
     /// implement  creator_id = UserSession<TUser>.user_session.Id;
     /// </summary> 
@@ -53,38 +94,89 @@ namespace SRLCore.Model
     {
         [Key]
         public virtual long id { get; set; }
-        public abstract long creator_id { get; set; }
+        public virtual long creator_id { get; set; }
         public virtual long? modifier_id { get; set; }
         public virtual DateTime create_date { get; set; } = DateTime.Now;
         public virtual DateTime? modify_date { get; set; }
         [Required]
         public virtual string status { get; set; } = EntityStatus.active.ToString();
-    } 
-
-    public abstract class CommonPropertyConfigurable<TEntity> : CommonProperty
-    where TEntity : class
-    {
-        /// <summary>
-        /// eg: public void Configure(EntityTypeBuilder<User> builder){
-        /// </summary> 
-        public static Action<EntityTypeBuilder<TEntity>> config { get; }
-
-        public class EntityConfiguration : IEntityTypeConfiguration<TEntity>
+        [NotMapped]
+        [JsonIgnore]
+        public virtual Func<CommonProperty, object> Selector => x => new
         {
-            Action<EntityTypeBuilder<TEntity>> configuration;
-            public EntityConfiguration(Action<EntityTypeBuilder<TEntity>> config_)
-            {
-                configuration = config_;
-            }
-            public void Configure(EntityTypeBuilder<TEntity> builder)
-            {
-                configuration(builder);
-            }
-        }
+            x.id,
+            x.create_date,
+            x.creator_id,
+            x.modifier_id,
+            x.modify_date
+        };
     }
 
- 
 
+    public abstract class IUserRole : CommonProperty
+    {
+        public abstract long user_id { get; set; }
+        public abstract long role_id { get; set; }
+
+    }
+    public abstract class IRole : CommonProperty
+    {
+        public abstract string name { get; set; }
+        public abstract string accesses { get; set; }
+
+    }
+    public abstract class IUser : CommonProperty
+    {
+        public abstract string username { get; set; }
+        public abstract string first_name { get; set; }
+        public abstract string last_name { get; set; }
+        public abstract string mobile { get; set; }
+        public abstract byte[] password_hash { get; set; }
+        public abstract string password { get; set; }
+        public abstract byte[] password_salt { get; set; }
+        /// <summary>
+        ///implementation: { get => $"{first_name} {last_name}"; }
+        /// </summary>
+        public abstract string full_name { get; }
+        public abstract bool? change_pass_next_login { get; set; }
+        public abstract DateTime? last_login { get; set; }
+
+        public static void CreatePasswordHashS(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new System.Security.Cryptography.HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
+            }
+        }
+        public void UpdatePasswordHash()
+        {
+            if (!string.IsNullOrWhiteSpace(password))
+            {
+               CreatePasswordHashS(password, out byte[] passwordHash, out byte[] passwordSalt);
+                password_hash = passwordHash;
+                password_salt = passwordSalt;
+            }
+        }
+
+
+
+    }
+
+    public abstract class IProvince : CommonProperty
+    {
+        public abstract string title { get; set; }
+    }
+
+
+    public static class EntityExtensions
+    {
+        public static void ThrowIfNotExist(this CommonProperty existingEntity)
+        { if (existingEntity == null) throw new GlobalException(SRLCore.Model.ErrorCode.NoContent); }
+         
+
+
+    }
 
 }
 

@@ -1,0 +1,139 @@
+﻿using SRLCore.Middleware;
+using SRLCore.Model;
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.Linq; 
+using System.Linq.Dynamic.Core; 
+
+
+namespace SRLCore.Model
+{
+    public abstract class WebRequest
+    {
+        public long id { get; set; }
+        public void CheckValidation(IResponse response)
+        {
+            if (CheckAttrbuteValidation())
+                if (CheckPropertyValidation())
+                {
+                    // if (!UserSession.HasNonActionAccess(NonActionAccess.AllData)) CheckAccessValidation();
+                }
+            if (validation_errors.Any())
+                throw new GlobalException(ErrorCode.BadRequest, validation_errors.First());
+
+        }
+        public bool CheckAttrbuteValidation()
+        {
+            validation_errors = SRL.ClassManagement.CheckValidationAttribute(this);
+            return validation_errors.Count == 0 ? true : false;
+        }
+        protected List<string> validation_errors { get; set; }
+        protected virtual bool CheckPropertyValidation() { return true; }
+        protected virtual bool CheckAccessValidation() { return true; }
+        public virtual EntityT ToEntity2<EntityT>(long? edit_id = null)
+            where EntityT : CommonProperty
+        { return null; }
+    }
+
+    public static class IQueryableExtensions
+    {
+        public static IQueryable<TModel> Paging<TModel>(this IQueryable<TModel> query, PagedResponse<object> response, int pageStart = 0, int pageSize = 0) where TModel : class
+        {
+            response.ItemsCount = query.Count();
+            response.PageNumber = pageStart;
+            response.PageSize = pageSize;
+            return pageSize > 0 && pageStart > 0 ? query.Skip((pageStart - 1) * pageSize).Take(pageSize) :
+                query.Skip(0);
+
+        }
+        public static IQueryable<T> FilterNonActionAccess<T>(this IQueryable<T> query, string my_id, Func<IQueryable<T>, IQueryable<T>> MyUnionFunc)
+        {
+            IQueryable<T> data_to_union = null;
+            List<string> where_list = new List<string>();
+            string share_id = nameof(IUser.creator_id);
+            //  where_list.Add($"{all_data}");
+
+            //if (!string.IsNullOrWhiteSpace(my_id)) where_list.Add($"({my_data} and {my_id}=={UserSession.Id})");
+            // else if (my_data && MyUnionFunc != null) data_to_union = MyUnionFunc(query);
+
+            //where_list.Add($"({share_data} and { share_id}=={ UserSession.Id})");
+            string where_clause = string.Join(" || ", where_list);
+            if (!string.IsNullOrWhiteSpace(where_clause)) query = query.Where(where_clause).AsQueryable();
+            if (data_to_union != null) query = query.Union(data_to_union).OrderBy(nameof(CommonProperty.create_date));
+            return query;
+        }
+    }
+
+
+    public class DateRangeAttribute : RangeAttribute
+    {
+        public DateRangeAttribute()
+           : base(typeof(DateTime), DateTime.Now.AddYears(-20).ToShortDateString(), DateTime.Now.AddYears(20).ToShortDateString()) { }
+    }
+    public class PasswordAttribute : ValidationAttribute
+    {
+        public override bool IsValid(object value)
+        {
+            if (value == null) return false;
+            string pass = value.ToString();
+            if (pass.Length < 8) return false;
+            return true;
+        }
+    }
+    public class PagedRequest
+    {
+        /// <summary>
+        /// 1
+        /// </summary>
+        public int page_start { get; set; }
+        /// <summary>
+        /// 100
+        /// </summary>
+        public int page_size { get; set; }
+    }
+
+    public class SearchUserRequest : PagedRequest
+    {
+        public long? id { get; set; }
+        public int? status { get; set; }
+    }
+    public class AddUserRequest : WebRequest
+    {
+
+        internal SRLCore.Model.PassMode pass_mode { get; set; }
+
+        [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("نام")]
+        public string first_name { get; set; }
+        [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("نام خانوادگی")]
+        public string last_name { get; set; }
+        [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("موبایل")]
+        [SRL.Security.Mobile(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
+        public string mobile { get; set; }
+        [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("کدملی")]
+        [SRL.Security.NationalCode(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
+        public string national_code { get; set; }
+        public string password { get; set; }
+        protected override bool CheckPropertyValidation()
+        {
+            bool is_valid = true;
+            if (pass_mode == SRLCore.Model.PassMode.add || !string.IsNullOrWhiteSpace(password))
+            {
+                if (password == null) is_valid = false;
+                else
+                {
+                    string pass = password.ToString();
+                    if (pass.Length < 8) is_valid = false;
+                }
+            }
+            if (is_valid == false)
+                validation_errors.Add(Constants.MessageText.PasswordFormatError);
+
+            return is_valid;
+        }
+
+       
+
+    }
+}

@@ -34,6 +34,10 @@ namespace SRLCore.Model
         string ErrorData { get; set; }
     }
 
+    public interface IGlobalResponse<TModel> : IResponse
+    {
+        TModel Model { get; set; }
+    }
     public interface ISingleResponse<TModel> : IResponse
     {
         TModel Model { get; set; }

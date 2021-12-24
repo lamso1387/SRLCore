@@ -14,10 +14,16 @@ namespace SRLCore.Model
         void RestrinctDeleteBehavior(ModelBuilder modelBuilder);
         void ModelCreator(ModelBuilder modelBuilder);
     }
+    public interface IDbContext<TUser, TRole, TUserRole> : IDbContext where TUser : IUser where TRole : class where TUserRole : class
+    {
+        DbSet<TUser> Users { get; set; }
+        DbSet<TRole> Roles { get; set; }
+        DbSet<TUserRole> UserRoles { get; set; }
+    }
 
     public interface ICommonProperty
     {
-        long id { get; set; } 
+        long id { get; set; }
         long creator_id { get; set; }
         long? modifier_id { get; set; }
         DateTime create_date { get; set; }
@@ -25,39 +31,6 @@ namespace SRLCore.Model
         string status { get; set; }
 
     }
-    public interface IUserRole : ICommonProperty
-    {
-        long user_id { get; set; }
-        long role_id { get; set; }
-
-    }
-    public interface IRole : ICommonProperty
-    {
-        string name { get; set; }
-        string accesses { get; set; }
-
-    }
-    public interface IUser : ICommonProperty
-    {
-
-        string username { get; set; }
-        string first_name { get; set; }
-        string last_name { get; set; }
-        string mobile { get; set; }
-        byte[] password_hash { get; set; }
-        string password { get; set; }
-        byte[] password_salt { get; set; }
-        /// <summary>
-        ///implementation: { get => $"{first_name} {last_name}"; }
-        /// </summary>
-        string full_name { get; }
-        bool? change_pass_next_login { get; set; }
-        DateTime? last_login { get; set; }
-
-
-
-    }
-
 
     public interface IBaseInfo<TBaseKind> : ICommonProperty
     {
@@ -67,13 +40,10 @@ namespace SRLCore.Model
     }
     public interface ICity : ICommonProperty
     {
-        long province_id { get; set; } 
+        long province_id { get; set; }
         string title { get; set; }
         string province_title { get; }
 
     }
-    public interface IProvince : ICommonProperty
-    { 
-        string title { get; set; }
-    }
+ 
 }

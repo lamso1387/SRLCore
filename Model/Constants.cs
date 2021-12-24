@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks; 
 
-namespace SRLCore.Model
+namespace SRLCore
 {
     public class Constants
     {
