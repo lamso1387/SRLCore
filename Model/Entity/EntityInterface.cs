@@ -13,6 +13,7 @@ namespace SRLCore.Model
     {
         void RestrinctDeleteBehavior(ModelBuilder modelBuilder);
         void ModelCreator(ModelBuilder modelBuilder);
+        string GetConnectionString();
     }
     public interface IDbContext<TUser, TRole, TUserRole> : IDbContext where TUser : IUser where TRole : class where TUserRole : class
     {

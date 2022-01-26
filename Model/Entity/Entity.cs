@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Http;
 using SRLCore.Middleware;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using System.IO;
 
 namespace SRLCore.Model
 {
@@ -20,6 +21,14 @@ namespace SRLCore.Model
          : base(options)
         {
 
+        }
+        public abstract string GetConnectionString();
+
+        public virtual TDb GetDbContext()
+        { 
+            var optionsBuilder = new DbContextOptionsBuilder<TDb>();
+            optionsBuilder.UseSqlServer(GetConnectionString()); 
+            return SRL.ClassManagement.CreateInstance<TDb>(optionsBuilder.Options); 
         }
         public abstract void ModelCreator(ModelBuilder modelBuilder);
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -50,10 +59,38 @@ namespace SRLCore.Model
                 relationship.DeleteBehavior = DeleteBehavior.Restrict;
             }
         }
+
+        public async Task AddSave<T>(T entity)
+        {
+            await AddAsync(entity);
+            int save = await SaveChangesAsync();
+            if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
+
+        }
+        public async Task RemoveSave<T>( T entity)
+        {
+            Remove(entity);
+            int save = await SaveChangesAsync();
+            if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
+
+        }
+        public async Task UpdateSave()
+        {
+            int save = await SaveChangesAsync();
+            if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
+
+        }
+        public async Task  Save ( )
+        { 
+            int save = await SaveChangesAsync();
+            if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
+
+        }
+
     }
     public abstract class DbEntity<TDb, TUser, TRole, TUserRole> : DbEntity<TDb>, IDbContext<TUser, TRole, TUserRole>
         where TDb : DbContext
-        where TUser : IUser where TRole : class where TUserRole : class
+        where TUser : IUser where TRole : IRole where TUserRole : IUserRole
     {
         public virtual DbSet<TUser> Users { get; set; }
         public virtual DbSet<TRole> Roles { get; set; }
@@ -83,7 +120,26 @@ namespace SRLCore.Model
         }
         public virtual async Task<TUser> GetUser(long id, string username)
         => await Users.FilterNonActionAccess(nameof(IUser.id), null).FirstOrDefaultAsync(item => item.id == id || (item.username == username));
-       
+
+
+        public virtual async Task<TRole> GetRole(long? id, string name=null)
+   => await Roles.FilterNonActionAccess(null, null).FirstOrDefaultAsync(item => item.id == id || item.name == name);
+        public virtual IQueryable<TRole> GetRoles( long? id = null, string name = null)
+        {
+            var query = Roles.AsQueryable();
+
+            if (id.HasValue)
+                query = query.Where(item => item.id == id);
+            if (!string.IsNullOrWhiteSpace(name))
+                query = query.Where(item => item.name == name);
+            query = query.FilterNonActionAccess(null, null);
+            return query;
+        }
+        public virtual async Task<TUserRole> GetUserRole(long? id, long? user_id=null, long? role_id=null)
+=> await UserRoles.FilterNonActionAccess(null, null).FirstOrDefaultAsync(item => item.id == id || (item.user_id == user_id && item.role_id == role_id));
+
+        public virtual IQueryable<TUserRole> GetUserRoles( long role_id)
+=> UserRoles.FilterNonActionAccess(null, null).Where(item => item.role_id == role_id).AsQueryable();
 
 
     }

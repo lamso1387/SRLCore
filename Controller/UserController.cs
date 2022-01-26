@@ -94,27 +94,27 @@ namespace SRLCore.Controllers
         [DisplayName("جستجوی کاربر")]
         public async Task<IActionResult> SearchUser([FromBody] SearchUserRequest request)
         {
-            string method = nameof(SearchUser);
-            LogHandler.LogMethod(EventType.Call, Logger, method, request);
             PagedResponse<object> response = new PagedResponse<object>();
+             
 
-            try
+            var query = await Db.GetUsers(request).Paging(response, request.page_start, request.page_size) 
+                .ToListAsync();
+            //var entity_list = query.Select(query[0].Selector);
+            
+
+
+            return response.ToResponse(query, x => new
             {
-
-                var query = await Db.GetUsers(request).Paging(response, request.page_start, request.page_size)
-                    //  .Include(x=>x.fund)
-                    .ToListAsync();
-                var entity_list = query
-                    .Select(query[0].Selector);
-                response.Model = entity_list;
-                response.ErrorCode = (int)ErrorCode.OK;
-            }
-            catch (Exception ex)
-            {
-                LogHandler.LogError(Logger, response, method, ex);
-            }
-
-            return response.ToHttpResponse(Logger, Request.HttpContext);
+                x.id,
+                x.create_date,
+                x.creator_id, 
+                x.first_name,
+                x.last_name,
+                x.username,
+                x.mobile,
+                x.status,
+                x.full_name
+            }); 
 
         }
 
@@ -273,7 +273,7 @@ namespace SRLCore.Controllers
         }
 
 
-      
+
 
     }
 }

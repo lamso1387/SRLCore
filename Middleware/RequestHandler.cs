@@ -36,6 +36,7 @@ namespace SRLCore.Middleware
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
     {
         public virtual string[] no_auth_actions => new string[] { "" };
+        public virtual string[] no_access_actions => new string[] { "" };
 
         protected readonly RequestDelegate _next;
 
@@ -44,7 +45,7 @@ namespace SRLCore.Middleware
             _next = next;
 
         }
-        public async Task Invoke(HttpContext context, UserService<Tcontext,TUser,TRole,TUserRole> _userService, ILogger Logger)
+        public async Task Invoke(HttpContext context, UserService<Tcontext, TUser, TRole, TUserRole> _userService, ILogger Logger)
         {
             Stream response_body = context.Response.Body;
             using (var memStream = new MemoryStream())
@@ -56,7 +57,7 @@ namespace SRLCore.Middleware
                 {
 
 
-                    bool need_auth = context.NeedAuth(no_auth_actions,ref action);
+                    bool need_auth = context.NeedAuth(no_auth_actions, ref action);
                     context.Request.EnableBuffering();
                     using (var reader = new StreamReader(
                         context.Request.Body,
@@ -92,17 +93,18 @@ namespace SRLCore.Middleware
                         if (user == null) throw new GlobalException(ErrorCode.Unauthorized);
 
                         context.Session.SetString("Id", user.id.ToString());
-                        context.Session.SetString("UserData",Newtonsoft.Json.JsonConvert.SerializeObject(user));
+                        context.Session.SetString("UserData", Newtonsoft.Json.JsonConvert.SerializeObject(user));
 
+                        bool need_access= context.NeedAccess(no_access_actions,  action);
                         bool has_authority = false;
-                        List<string> user_accesses = new List<string>();
-                        if (action != "authenticate") has_authority = _userService.Authorization(action,user.id, out user_accesses);
+                        List<string> user_accesses = new List<string>(); 
+                        if (action != "authenticate") has_authority = _userService.Authorization(action, user.id, out user_accesses);
 
-                        if (has_authority == false) throw new GlobalException(ErrorCode.NoDataAccess);
+                        if (has_authority == false && need_access) throw new GlobalException(ErrorCode.NoDataAccess);
 
-                        context.Session.SetString("Accesses", Newtonsoft.Json.JsonConvert.SerializeObject(user_accesses)); 
+                        context.Session.SetString("Accesses", Newtonsoft.Json.JsonConvert.SerializeObject(user_accesses));
 
-                       var claims = new[] {
+                        var claims = new[] {
                 new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),
                 new Claim(ClaimTypes.Name, user.full_name)};
                         var identity = new ClaimsIdentity(claims, "BasicAuthentication");
@@ -125,14 +127,16 @@ namespace SRLCore.Middleware
                     string responseBody = new StreamReader(memStream,
                         encoding: Encoding.UTF8
                         , detectEncodingFromByteOrderMarks: false).ReadToEnd();
-                    LogHandler.LogMethod(EventType.Return, Logger, action, context.Response.StatusCode,
-                        Newtonsoft.Json.JsonConvert.DeserializeObject(SRL.Convertor.StringToRegx(responseBody)));
+                    if (context.Response.ContentType !=null? context.Response.ContentType.ToLower().Contains("application/json"): false)
+                        LogHandler.LogMethod(EventType.Return, Logger, action, context.Response.StatusCode,
+                            Newtonsoft.Json.JsonConvert.DeserializeObject(SRL.Convertor.StringToRegx(responseBody)));
                     memStream.Position = 0;
                     await memStream.CopyToAsync(response_body);
                 }
                 finally
                 {
                     context.Response.Body = response_body;
+
                 }
 
             }
@@ -170,7 +174,6 @@ namespace SRLCore.Middleware
             }
             return context.Response.WriteAsync(output);
         }
-
 
     }
     public class GlobalException : Exception

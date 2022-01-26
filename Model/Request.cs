@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq; 
-using System.Linq.Dynamic.Core; 
+using System.Linq;
+using System.Linq.Dynamic.Core;
 
 
 namespace SRLCore.Model
@@ -72,16 +72,7 @@ namespace SRLCore.Model
         public DateRangeAttribute()
            : base(typeof(DateTime), DateTime.Now.AddYears(-20).ToShortDateString(), DateTime.Now.AddYears(20).ToShortDateString()) { }
     }
-    public class PasswordAttribute : ValidationAttribute
-    {
-        public override bool IsValid(object value)
-        {
-            if (value == null) return false;
-            string pass = value.ToString();
-            if (pass.Length < 8) return false;
-            return true;
-        }
-    }
+   
     public class PagedRequest
     {
         /// <summary>
@@ -92,8 +83,9 @@ namespace SRLCore.Model
         /// 100
         /// </summary>
         public int page_size { get; set; }
-    }
+    } 
 
+   
     public class SearchUserRequest : PagedRequest
     {
         public long? id { get; set; }
@@ -109,10 +101,10 @@ namespace SRLCore.Model
         [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("نام خانوادگی")]
         public string last_name { get; set; }
         [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("موبایل")]
-        [SRL.Security.Mobile(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
+        [SRL.Mobile(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
         public string mobile { get; set; }
         [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("کدملی")]
-        [SRL.Security.NationalCode(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
+        [SRL.NationalCode(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
         public string national_code { get; set; }
         public string password { get; set; }
         protected override bool CheckPropertyValidation()
@@ -133,7 +125,33 @@ namespace SRLCore.Model
             return is_valid;
         }
 
-       
+
+
+    }
+
+    public class AddRoleRequest : WebRequest
+    {
+        [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("نام")]
+        public string name { get; set; }
+        [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("دسترسی ها")]
+        public List<string> accesses { get; set; }
+        [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("کاربران")]
+        public List<long> user_ids { get; set; }
+        protected override bool CheckPropertyValidation()
+        {
+            bool is_valid = true;
+            is_valid = accesses == null ? false : accesses.Count > 0;
+            if (is_valid == false)
+                validation_errors.Add(Constants.MessageText.RoleAccessNotDefinedError);
+            else
+            {
+                is_valid = user_ids == null ? false : user_ids.Count > 0;
+                if (is_valid == false)
+                    validation_errors.Add(Constants.MessageText.RoleUsersNotDefinedError);
+            }
+            return is_valid;
+        }
+
 
     }
 }

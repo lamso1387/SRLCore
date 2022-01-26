@@ -80,20 +80,20 @@ namespace SRLCore.Controllers
             return response.ToResponse();
         }
 
-        public virtual async Task AddSave<T>(Tcontext db, T entity)
+        protected virtual async Task AddSave<T>(Tcontext db, T entity)
         {
             await db.AddAsync(entity);
             int save = await db.SaveChangesAsync();
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public virtual async Task UpdateSave(Tcontext db)
+        protected virtual async Task UpdateSave(Tcontext db)
         {
             int save = await db.SaveChangesAsync();
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public virtual async Task RemoveSave<T>(Tcontext db, T entity)
+        protected virtual async Task RemoveSave<T>(Tcontext db, T entity)
         {
             db.Remove(entity);
             int save = await db.SaveChangesAsync();

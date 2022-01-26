@@ -31,6 +31,10 @@ namespace SRLCore.Model
             action = context.GetActionName();
             return !no_auth_actions.Contains(action);
         }
+        public static bool NeedAccess(this HttpContext context, string[] no_access_actions, string action)
+        { 
+            return !no_access_actions.Contains(action);
+        }
     }
     
 
