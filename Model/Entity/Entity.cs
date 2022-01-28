@@ -166,6 +166,12 @@ namespace SRLCore.Model
             x.modifier_id,
             x.modify_date
         };
+        [NotMapped]
+        public virtual EntityStatus status_enum
+        {
+            get => SRL.Convertor.StringToEnum<EntityStatus>(status);
+            set { status = value.ToString(); }
+        }
     }
 
 
