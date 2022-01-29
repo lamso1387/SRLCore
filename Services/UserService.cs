@@ -27,7 +27,7 @@ using Microsoft.AspNetCore.Http;
 namespace SRLCore.Services
 {
 
-    public class UserService<Tcontext,TUser,TRole,TUserRole>
+    public abstract class UserService<Tcontext,TUser,TRole,TUserRole>
         where TUser:IUser where TRole:IRole where TUserRole:IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
 

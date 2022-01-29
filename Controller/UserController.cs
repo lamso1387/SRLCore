@@ -19,7 +19,7 @@ namespace SRLCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class UserController<Tcontext, TUser, TRole, TUserRole> : CommonController<Tcontext, TUser, TRole, TUserRole>
+    public abstract class UserController<Tcontext, TUser, TRole, TUserRole> : CommonController<Tcontext, TUser, TRole, TUserRole>
         where TUser : IUser where TRole : IRole where TUserRole : IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
     {
