@@ -20,15 +20,15 @@ using System.Web;
 using System.ComponentModel;
 using Task = System.Threading.Tasks.Task;
 using System.Net;
-using Microsoft.AspNetCore.Builder; 
+using Microsoft.AspNetCore.Builder;
 using SRLCore.Model;
 using Microsoft.AspNetCore.Http;
 
 namespace SRLCore.Services
 {
 
-    public abstract class UserService<Tcontext,TUser,TRole,TUserRole>
-        where TUser:IUser where TRole:IRole where TUserRole:IUserRole
+    public class UserService<Tcontext, TUser, TRole, TUserRole>
+        where TUser : IUser where TRole : IRole where TUserRole : IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
 
     {
@@ -48,7 +48,7 @@ namespace SRLCore.Services
             {
                 return null;
             }
-           
+
 
             return user;
 
@@ -56,15 +56,15 @@ namespace SRLCore.Services
         }
         public void CreatePasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
-          IUser.CreatePasswordHashS(password,  out passwordHash,   out passwordSalt);
-           
+            IUser.CreatePasswordHashS(password, out passwordHash, out passwordSalt);
+
         }
-       
+
 
 
         public bool Authorization(string action, long user_id, out List<string> user_accesses)
         {
-            user_accesses= UserSession<TUser>.GetAccesses(_context, user_id);
+            user_accesses = UserSession<TUser>.GetAccesses(_context, user_id);
             bool is_allowed = user_accesses.Distinct().Contains(action);
             return is_allowed;
         }
@@ -86,4 +86,6 @@ namespace SRLCore.Services
         }
 
     }
+
+     
 }

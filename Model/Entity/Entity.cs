@@ -24,7 +24,7 @@ namespace SRLCore.Model
         }
         public abstract string GetConnectionString();
 
-        public virtual TDb GetDbContext()
+        public virtual TDb GetNewDbContext()
         { 
             var optionsBuilder = new DbContextOptionsBuilder<TDb>();
             optionsBuilder.UseSqlServer(GetConnectionString()); 
