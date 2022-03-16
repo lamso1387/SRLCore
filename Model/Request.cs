@@ -7,6 +7,12 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Linq.Dynamic.Core;
 
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using Newtonsoft.Json; 
+using System.ComponentModel.DataAnnotations.Schema;
+using System.IO; 
+
 
 namespace SRLCore.Model
 {
@@ -53,15 +59,52 @@ namespace SRLCore.Model
             IQueryable<T> data_to_union = null;
             List<string> where_list = new List<string>();
             string share_id = nameof(IUser.creator_id);
-            //  where_list.Add($"{all_data}");
+            // where_list.Add($"{all_data}");
 
-            //if (!string.IsNullOrWhiteSpace(my_id)) where_list.Add($"({my_data} and {my_id}=={UserSession.Id})");
+           // if (!string.IsNullOrWhiteSpace(my_id)) where_list.Add($"({my_data} and {my_id}=={UserSession.Id})");
             // else if (my_data && MyUnionFunc != null) data_to_union = MyUnionFunc(query);
 
             //where_list.Add($"({share_data} and { share_id}=={ UserSession.Id})");
             string where_clause = string.Join(" || ", where_list);
             if (!string.IsNullOrWhiteSpace(where_clause)) query = query.Where(where_clause).AsQueryable();
             if (data_to_union != null) query = query.Union(data_to_union).OrderBy(nameof(CommonProperty.create_date));
+            return query;
+        }
+        public static IQueryable<EntityT> FilterConstraintAccess<EntityT>(this IQueryable<EntityT> query,List<string> constraints_str) where EntityT:ICommonProperty
+        {
+             List<long> constrains = new List<long>();
+            foreach (var item in constraints_str)
+            {
+                if(item !=null)
+                constrains.AddRange(item.Split(',').ToList().Select(y => long.Parse(y)).ToList());
+
+            } 
+            if(constrains.Any())
+            {
+                query = query.Where(x => constrains.Contains(x.id));
+            }    
+            return query;
+        }
+        public static IQueryable<EntityT> FilterConstraintAccess2<EntityT>(this IQueryable<EntityT> query, List<string> constraints_str) where EntityT : ICommonProperty
+        {
+            List<string> constrains = new List<string>();
+            foreach (var item in constraints_str)
+            {
+                if (item != null)
+                    constrains.AddRange(item.Split(',').ToList());
+
+            }
+            if (constrains.Any())
+            {
+                List<string> where_list = new List<string>();
+                foreach (var constrain in constrains)
+                {
+                    where_list.Add($" contract_id=\"{constrain}\"");
+                }
+                
+                string where_clause = string.Join(" || ", where_list);
+                if (!string.IsNullOrWhiteSpace(where_clause)) query = query.Where(where_clause).AsQueryable();
+            }
             return query;
         }
     }

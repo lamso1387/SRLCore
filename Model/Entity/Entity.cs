@@ -109,7 +109,7 @@ namespace SRLCore.Model
             if (id.HasValue)
                 query = query.Where(item => item.id == id);
 
-            query = query.FilterNonActionAccess(nameof(IUser.id), null);
+            query = query;
 
             return query;
         }
@@ -119,11 +119,11 @@ namespace SRLCore.Model
 
         }
         public virtual async Task<TUser> GetUser(long id, string username)
-        => await Users.FilterNonActionAccess(nameof(IUser.id), null).FirstOrDefaultAsync(item => item.id == id || (item.username == username));
+        => await Users.FirstOrDefaultAsync(item => item.id == id || (item.username == username));
 
 
         public virtual async Task<TRole> GetRole(long? id, string name=null)
-   => await Roles.FilterNonActionAccess(null, null).FirstOrDefaultAsync(item => item.id == id || item.name == name);
+   => await Roles.FirstOrDefaultAsync(item => item.id == id || item.name == name);
         public virtual IQueryable<TRole> GetRoles( long? id = null, string name = null)
         {
             var query = Roles.AsQueryable();
@@ -132,14 +132,14 @@ namespace SRLCore.Model
                 query = query.Where(item => item.id == id);
             if (!string.IsNullOrWhiteSpace(name))
                 query = query.Where(item => item.name == name);
-            query = query.FilterNonActionAccess(null, null);
+            query = query;
             return query;
         }
         public virtual async Task<TUserRole> GetUserRole(long? id, long? user_id=null, long? role_id=null)
-=> await UserRoles.FilterNonActionAccess(null, null).FirstOrDefaultAsync(item => item.id == id || (item.user_id == user_id && item.role_id == role_id));
+=> await UserRoles.FirstOrDefaultAsync(item => item.id == id || (item.user_id == user_id && item.role_id == role_id));
 
         public virtual IQueryable<TUserRole> GetUserRoles( long role_id)
-=> UserRoles.FilterNonActionAccess(null, null).Where(item => item.role_id == role_id).AsQueryable();
+=> UserRoles.Where(item => item.role_id == role_id).AsQueryable();
 
 
     }
