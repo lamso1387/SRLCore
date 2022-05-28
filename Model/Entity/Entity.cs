@@ -11,6 +11,9 @@ using SRLCore.Middleware;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using System.IO;
+using System.Data;
+using System.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace SRLCore.Model
 {
@@ -22,13 +25,71 @@ namespace SRLCore.Model
         {
 
         }
+        public int ExecuteTruncateTable(string table_name)
+        {
+            string query = $"TRUNCATE TABLE {table_name};";
+
+            return ExecuteNonSqlQuery(query);
+
+        }
+        public int ExecuteNonSqlQuery(string query, int? time_out_second = null)
+        {
+
+            using (var command = Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = query;
+                command.CommandType = CommandType.Text;
+
+                if (time_out_second != null)
+                    command.CommandTimeout = (int)time_out_second;
+
+                Database.OpenConnection();
+
+                return command.ExecuteNonQuery();
+
+            }
+
+        }
+        public SqlDataReader ExecuteDataQuery(string query)
+        {
+
+            using (var command = Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = query;
+                command.CommandType = CommandType.Text;
+
+                Database.OpenConnection();
+
+                SqlDataReader dr = (SqlDataReader)command.ExecuteReader();
+
+                return dr;
+
+            }
+
+        }
+        public int ExecuteCount(string query)
+        {
+            using (var command = Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = query;
+                command.CommandType = CommandType.Text;
+
+                Database.OpenConnection();
+                var count_ = command.ExecuteScalar();
+                int count_2 = (int)count_;
+                Database.CloseConnection();
+                return count_2;
+            }
+
+        }
+
         public abstract string GetConnectionString();
 
         public virtual TDb GetNewDbContext()
-        { 
+        {
             var optionsBuilder = new DbContextOptionsBuilder<TDb>();
-            optionsBuilder.UseSqlServer(GetConnectionString()); 
-            return SRL.ClassManagement.CreateInstance<TDb>(optionsBuilder.Options); 
+            optionsBuilder.UseSqlServer(GetConnectionString());
+            return SRL.ClassManagement.CreateInstance<TDb>(optionsBuilder.Options);
         }
         public abstract void ModelCreator(ModelBuilder modelBuilder);
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -52,6 +113,17 @@ namespace SRLCore.Model
         public void ColumnUnique(IndexBuilder ib) => ib.IsUnique();
 
 
+        public string GetTableName<T>() where T : class
+        {   
+            var entityTypes = Model.GetEntityTypes();
+             
+            var entityTypeOfT = entityTypes.First(t => t.ClrType == typeof(T));
+
+            var tableNameAnnotation = entityTypeOfT.GetAnnotation("Relational:TableName");
+            var TableName = tableNameAnnotation.Value.ToString();
+            return TableName;
+        }
+
         public virtual void RestrinctDeleteBehavior(ModelBuilder modelBuilder)
         {
             foreach (var relationship in modelBuilder.Model.GetEntityTypes().SelectMany(e => e.GetForeignKeys()))
@@ -67,21 +139,32 @@ namespace SRLCore.Model
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public async Task RemoveSave<T>( T entity)
+        public async Task<int> AddRangeSave<T>(List<T> entity_list) where T:class
+        {
+            //Set<T>().AddRange(request);
+            //SaveChanges();
+
+            await Set<T>().AddRangeAsync(entity_list);
+            int save = await SaveChangesAsync();
+            if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
+            else return save;
+        }
+        public async Task RemoveSave<T>(T entity)
         {
             Remove(entity);
             int save = await SaveChangesAsync();
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public async Task UpdateSave()
+        public async Task<int> UpdateSave()
         {
             int save = await SaveChangesAsync();
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
+            else return save;
 
         }
-        public async Task  Save ( )
-        { 
+        public async Task Save()
+        {
             int save = await SaveChangesAsync();
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
@@ -122,9 +205,9 @@ namespace SRLCore.Model
         => await Users.FirstOrDefaultAsync(item => item.id == id || (item.username == username));
 
 
-        public virtual async Task<TRole> GetRole(long? id, string name=null)
+        public virtual async Task<TRole> GetRole(long? id, string name = null)
    => await Roles.FirstOrDefaultAsync(item => item.id == id || item.name == name);
-        public virtual IQueryable<TRole> GetRoles( long? id = null, string name = null)
+        public virtual IQueryable<TRole> GetRoles(long? id = null, string name = null)
         {
             var query = Roles.AsQueryable();
 
@@ -135,10 +218,10 @@ namespace SRLCore.Model
             query = query;
             return query;
         }
-        public virtual async Task<TUserRole> GetUserRole(long? id, long? user_id=null, long? role_id=null)
+        public virtual async Task<TUserRole> GetUserRole(long? id, long? user_id = null, long? role_id = null)
 => await UserRoles.FirstOrDefaultAsync(item => item.id == id || (item.user_id == user_id && item.role_id == role_id));
 
-        public virtual IQueryable<TUserRole> GetUserRoles( long role_id)
+        public virtual IQueryable<TUserRole> GetUserRoles(long role_id)
 => UserRoles.Where(item => item.role_id == role_id).AsQueryable();
 
 
@@ -215,7 +298,7 @@ namespace SRLCore.Model
         {
             if (!string.IsNullOrWhiteSpace(password))
             {
-               CreatePasswordHashS(password, out byte[] passwordHash, out byte[] passwordSalt);
+                CreatePasswordHashS(password, out byte[] passwordHash, out byte[] passwordSalt);
                 password_hash = passwordHash;
                 password_salt = passwordSalt;
             }
@@ -235,7 +318,7 @@ namespace SRLCore.Model
     {
         public static void ThrowIfNotExist(this CommonProperty existingEntity)
         { if (existingEntity == null) throw new GlobalException(SRLCore.Model.ErrorCode.NoContent); }
-         
+
 
 
     }
