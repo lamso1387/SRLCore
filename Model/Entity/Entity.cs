@@ -97,11 +97,12 @@ namespace SRLCore.Model
             ModelCreator(modelBuilder);
             base.OnModelCreating(modelBuilder);
         }
+        public virtual void Configuration(DbContextOptionsBuilder optionsBuilder) { }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            base.OnConfiguring(optionsBuilder);
-
+        { 
             optionsBuilder.EnableSensitiveDataLogging();
+            Configuration(optionsBuilder);
+            base.OnConfiguring(optionsBuilder);
         }
         /// <summary>
         /// (builder.Property(e => e.mobile), 11)

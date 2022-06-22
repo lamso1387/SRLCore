@@ -100,7 +100,7 @@ namespace SRLCore.Middleware
                         List<string> user_accesses = new List<string>(); 
                         if (action != "authenticate") has_authority = _userService.Authorization(action, user.id, out user_accesses);
 
-                        if (has_authority == false && need_access) throw new GlobalException(ErrorCode.NoDataAccess);
+                        if (has_authority == false && need_access) throw new GlobalException(ErrorCode.Forbidden);
 
                         context.Session.SetString("Accesses", Newtonsoft.Json.JsonConvert.SerializeObject(user_accesses));
 

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 using System.ComponentModel;
-
+using System.Net;
 
 namespace SRLCore.Model
 { 
@@ -47,15 +47,17 @@ namespace SRLCore.Model
             [Description(@"{""message"":""اطلاعات تکراری است"" ,""status"": ""Conflict""}")]
             AddRepeatedEntity = 5,
             [Description(@"{""message"":""مورد یافت نشد"" ,""status"": ""NoContent""}")]
-            NoContent = 6,
+            NoContent = HttpStatusCode.NoContent,
             [Description(@"{""message"":""هزینه ابطال صندوق تعیین نشده است"" ,""status"": ""PreconditionFailed""}")]
             FundCancelCostNotSet = 7,
             [Description(@"{""message"":""سود سالانه تعیین نشده است"" ,""status"": ""PreconditionFailed""}")]
             AnnualProfitNotSet = 8,
             [Description(@"{""message"":""دسترسی به اطلاعات وجود ندارد"" ,""status"": ""Forbidden""}")]
-            NoDataAccess = 9,
+            Forbidden = HttpStatusCode.Forbidden,
             [Description(@"{""message"":""نام کاربری یا رمز عبور اشتباه است"" ,""status"": ""Unauthorized""}")]
-            Unauthorized = 10
+            Unauthorized = HttpStatusCode.Unauthorized,
+            [Description(@"{""message"":""خطا در سرویس وابسته رخ داد"" ,""status"": ""FailedDependency""}")]
+            FailedDependency = HttpStatusCode.FailedDependency
         }
         public enum NonActionAccess
         {
