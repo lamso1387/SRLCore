@@ -70,7 +70,7 @@ namespace SRLCore.Model
             if (data_to_union != null) query = query.Union(data_to_union).OrderBy(nameof(CommonProperty.create_date));
             return query;
         }
-        public static IQueryable<EntityT> FilterConstraintAccess<EntityT>(this IQueryable<EntityT> query,List<string> constraints_str) where EntityT:ICommonProperty
+        public static IQueryable<EntityT> FilterConstraintById<EntityT>(this IQueryable<EntityT> query,List<string> constraints_str) where EntityT:ICommonProperty
         {
              List<long> constrains = new List<long>();
             foreach (var item in constraints_str)
@@ -85,7 +85,7 @@ namespace SRLCore.Model
             }    
             return query;
         }
-        public static IQueryable<EntityT> FilterConstraintAccess2<EntityT>(this IQueryable<EntityT> query, List<string> constraints_str) where EntityT : ICommonProperty
+        public static IQueryable<EntityT> FilterConstraintByIntColumn<EntityT>(this IQueryable<EntityT> query, List<string> constraints_str, string col_name) where EntityT : ICommonProperty
         {
             List<string> constrains = new List<string>();
             foreach (var item in constraints_str)
@@ -99,11 +99,36 @@ namespace SRLCore.Model
                 List<string> where_list = new List<string>();
                 foreach (var constrain in constrains)
                 {
-                    where_list.Add($" contract_id=\"{constrain}\"");
+                    where_list.Add($" {col_name}=\"{constrain}\" ");
                 }
                 
                 string where_clause = string.Join(" || ", where_list);
                 if (!string.IsNullOrWhiteSpace(where_clause)) query = query.Where(where_clause).AsQueryable();
+            }
+            return query;
+        }
+
+        public static IQueryable<EntityT> FilterConstraintByStringColumn<EntityT>(this IQueryable<EntityT> query, List<string> constraints_str, string col_name)
+        {
+            List<string> constrains = new List<string>();
+            foreach (var item in constraints_str)
+            {
+                if (item != null)
+                    constrains.AddRange(item.Split(',').ToList());
+
+            }
+            if (constrains.Any())
+            {
+                List<string> where_list = new List<string>();
+                List<object> parameters = new List<object>(); 
+                foreach (var constrain in constrains)
+                {  
+                    where_list.Add($"{col_name} == @{constrains.IndexOf(constrain)}");
+                    parameters.Add(constrain);
+                }
+
+                string where_clause = string.Join(" || ", where_list);
+                if (!string.IsNullOrWhiteSpace(where_clause)) query = query.Where(where_clause,parameters.ToArray()).AsQueryable();
             }
             return query;
         }
