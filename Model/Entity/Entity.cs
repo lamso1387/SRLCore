@@ -193,7 +193,6 @@ namespace SRLCore.Model
             if (id.HasValue)
                 query = query.Where(item => item.id == id);
 
-            query = query;
 
             return query;
         }
@@ -216,7 +215,7 @@ namespace SRLCore.Model
                 query = query.Where(item => item.id == id);
             if (!string.IsNullOrWhiteSpace(name))
                 query = query.Where(item => item.name == name);
-            query = query;
+
             return query;
         }
         public virtual async Task<TUserRole> GetUserRole(long? id, long? user_id = null, long? role_id = null)
@@ -266,7 +265,7 @@ namespace SRLCore.Model
 
     }
     public abstract class IRole : CommonProperty
-    {
+    { 
         public abstract string name { get; set; }
         public abstract string accesses { get; set; }
 

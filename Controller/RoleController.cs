@@ -16,6 +16,7 @@ using SRL;
 using SRLCore.Model;
 using System.Reflection;
 using SRLCore.Middleware;
+using System.Linq.Dynamic.Core;
 
 namespace SRLCore.Controllers
 {
@@ -27,11 +28,16 @@ namespace SRLCore.Controllers
     {
         protected abstract TRole RequestToEntity(AddRoleRequest requst, long? edit_id = null);
         protected abstract TUserRole CreateUserRole(TRole role, TUser user);
+        protected virtual string user_roles_col_name =>"user_roles";
+        protected virtual string user_col_name => "user";
 
-        protected abstract List<TUser> LoadUserRoles(TRole existingEntity);
 
-        //Db.Entry(existingEntity).Collection(a => a.user_roles).Query().Include(b => b.user).Load();
-
+        protected virtual List<TUser> LoadUserRoles(TRole existingEntity)
+        {
+            Db.Entry(existingEntity).Collection<TUserRole>(user_roles_col_name).Query().Include(user_col_name).Load();
+            var users = ((ICollection<TUserRole>)SRL.ClassManagement.GetProperty(user_roles_col_name, existingEntity)).AsQueryable().Select(user_col_name).ToDynamicList<TUser>();
+            return users;
+        }
 
         protected virtual   Func<TRole, object> RoleSelector(List<TUser> users)
         {
