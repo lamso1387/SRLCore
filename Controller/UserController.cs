@@ -24,6 +24,17 @@ namespace SRLCore.Controllers
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
     {
         protected virtual TUser RequestToEntity(AddUserRequest requst) { return null; }
+        public static Func<TUser, object> OrderBurberrySelector => x => new
+        {
+            x.id,
+            x.create_date,
+            x.creator_id,
+            x.status,
+            x.first_name,
+            x.last_name,
+            x.mobile,
+            x.username,
+        };
         public UserController(IDistributedCache distributedCache,
             ILogger<UserController<Tcontext, TUser, TRole, TUserRole>> logger, Tcontext dbContext,
             SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
@@ -95,26 +106,24 @@ namespace SRLCore.Controllers
         public async Task<IActionResult> SearchUser([FromBody] SearchUserRequest request)
         {
             PagedResponse<object> response = new PagedResponse<object>();
-             
 
-            var query = await Db.GetUsers(request).Paging(response, request.page_start, request.page_size) 
+
+            var query = await Db.GetUsers(request).Paging(response, request.page_start, request.page_size)
                 .ToListAsync();
-            //var entity_list = query.Select(query[0].Selector);
-            
 
 
             return response.ToResponse(query, x => new
             {
                 x.id,
                 x.create_date,
-                x.creator_id, 
+                x.creator_id,
                 x.first_name,
                 x.last_name,
                 x.username,
                 x.mobile,
                 x.status,
                 x.full_name
-            }); 
+            });
 
         }
 
@@ -246,30 +255,15 @@ namespace SRLCore.Controllers
         [DisplayName("مشاهده کاربر")]
         public async Task<IActionResult> GetUser(long id)
         {
-            string method = nameof(GetUser);
-            LogHandler.LogMethod(EventType.Call, Logger, method, id);
-            SingleResponse<object> response = new SingleResponse<object>();
+            SingleResponse<object> response = new SingleResponse<object>(); 
+            var existingEntity = await Db.GetUser(id, null);
+            existingEntity.ThrowIfNotExist();
+
+            var entity = new List<TUser> { existingEntity }
+                .Select(existingEntity.Selector).First();
 
 
-            try
-            {
-
-                var existingEntity = await Db.GetUser(id, null);
-                if (existingEntity == null)
-                {
-                    response.ErrorCode = (int)ErrorCode.NoContent;
-                    return response.ToHttpResponse(Logger, Request.HttpContext);
-                }
-                var entity = new List<TUser> { existingEntity }
-                    .Select(existingEntity.Selector).First();
-                response.Model = entity;
-                response.ErrorCode = (int)ErrorCode.OK;
-            }
-            catch (Exception ex)
-            {
-                LogHandler.LogError(Logger, response, method, ex);
-            }
-            return response.ToHttpResponse(Logger, Request.HttpContext);
+            return response.ToResponse(existingEntity);
         }
 
 

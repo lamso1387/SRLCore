@@ -60,7 +60,7 @@ namespace SRLCore.Controllers
         protected abstract System.Linq.Expressions.Expression<Func<TUserRole, TUser>> UserSelector { get; } 
 
         protected abstract Func<TUserRole, TUser> UserRoleSelector { get; } //=> x => null;
-        protected abstract Assembly GetCurrentAssembly { get; }
+        protected abstract Assembly CurrentAssembly { get; }
         //Assembly.GetAssembly(typeof(CommonController<Tcontext, TUser, TRole, TUserRole>))
 
         public RoleController(IDistributedCache distributedCache,
@@ -264,12 +264,15 @@ namespace SRLCore.Controllers
 
         [HttpGet("accesses")]
         [DisplayName("مشاهده دسترسی ها")]
-        public async Task<IActionResult> GetAccesses()
+        public IActionResult GetAccesses()
         {
             SingleResponse<object> response = new SingleResponse<object>();
 
-            IEnumerable<Type> all_controller_types = SRL.ChildParent
-                .GetAllChildrenClasses<CommonController<Tcontext, TUser, TRole, TUserRole>>(GetCurrentAssembly);
+            List<Type> all_controller_types = SRL.ChildParent
+                .GetAllChildrenClasses<CommonController<Tcontext, TUser, TRole, TUserRole>>(CurrentAssembly);
+
+            all_controller_types.Add(typeof(UserController<Tcontext, TUser, TRole, TUserRole>));
+            all_controller_types.Add(typeof(RoleController<Tcontext, TUser, TRole, TUserRole>)); 
 
             List<object> action_titles = new List<object>();
             foreach (var controller_type in all_controller_types)
