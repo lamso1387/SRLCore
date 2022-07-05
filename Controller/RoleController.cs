@@ -30,6 +30,8 @@ namespace SRLCore.Controllers
         protected abstract TUserRole CreateUserRole(TRole role, TUser user);
         protected virtual string user_roles_col_name =>"user_roles";
         protected virtual string user_col_name => "user";
+        protected virtual List<string> role_constraint_col_names => new List<string>();
+
 
 
         protected virtual List<TUser> LoadUserRoles(TRole existingEntity)
@@ -39,7 +41,7 @@ namespace SRLCore.Controllers
             return users;
         }
 
-        protected virtual   Func<TRole, object> RoleSelector(List<TUser> users)
+        protected virtual   Func<TRole, object> RoleSelector(List<TUser> users, List<RoleConstraint> role_constraints)
         {
             var users_select = users.Select(y => new { y.first_name, y.last_name, y.full_name, y.id }).ToArray();
             var users_ids = users.Select(y => y.id);
@@ -53,13 +55,13 @@ namespace SRLCore.Controllers
                 x.name,
                 x.status,
                 users = users_select,
-                user_ids = users_ids
+                user_ids = users_ids,
+                constraints= role_constraints
+
             };
         }
-
-        protected abstract System.Linq.Expressions.Expression<Func<TUserRole, TUser>> UserSelector { get; } 
-
-        protected abstract Func<TUserRole, TUser> UserRoleSelector { get; } //=> x => null;
+         
+         
         protected abstract Assembly CurrentAssembly { get; }
         //Assembly.GetAssembly(typeof(CommonController<Tcontext, TUser, TRole, TUserRole>))
 
@@ -185,15 +187,27 @@ namespace SRLCore.Controllers
         [DisplayName("مشاهده نقش")]
         public async Task<IActionResult> GetRole(long id)
         {
-
             SingleResponse<object> response = new SingleResponse<object>();
 
             var existingEntity = await Db.GetRole(id);
             existingEntity.ThrowIfNotExist();
 
             List<TUser> users = LoadUserRoles(existingEntity);
+            List<RoleConstraint> constraints = new List<RoleConstraint>();
 
-            return response.ToResponse(existingEntity, RoleSelector(users));
+            foreach (var constraint_col_name in role_constraint_col_names)
+            {
+                RoleConstraint constraint = new RoleConstraint();
+                constraint.column_name = constraint_col_name;
+                var const_ = (string)SRL.ClassManagement.GetProperty(constraint_col_name, existingEntity);
+                if(!string.IsNullOrWhiteSpace(const_))
+                {
+                    constraint.constraints = const_.Split(",").ToList();
+                }
+                constraints.Add(constraint);
+            }
+
+            return response.ToResponse(existingEntity, RoleSelector(users, constraints));
         }
 
         [HttpPut("edit")]
@@ -224,7 +238,7 @@ namespace SRLCore.Controllers
             existingEntity.accesses = entiry.accesses;
              
 
-            IEnumerable<TUser> users_old = Db.UserRoles.Where(x => x.role_id == existingEntity.id).Select(UserSelector);
+            IEnumerable<TUser> users_old = Db.UserRoles.Where(x => x.role_id == existingEntity.id).Select<TUser>(user_col_name);
             var user_ids_to_delet = users_old.Select(x => x.id).Where(x => !request.user_ids.Select(y => y).Contains(x));
             var user_ids_new = request.user_ids.Select(x => x).Where(x => !users_old.Select(y => y.id).Contains(x));
 
