@@ -31,7 +31,9 @@ namespace SRLCore.Controllers
         protected virtual string user_roles_col_name =>"user_roles";
         protected virtual string user_col_name => "user";
         protected virtual List<string> role_constraint_col_names => new List<string>();
-
+        
+        protected virtual Type policy_access_enum_type => null;
+  
 
 
         protected virtual List<TUser> LoadUserRoles(TRole existingEntity)
@@ -288,21 +290,31 @@ namespace SRLCore.Controllers
             all_controller_types.Add(typeof(UserController<Tcontext, TUser, TRole, TUserRole>));
             all_controller_types.Add(typeof(RoleController<Tcontext, TUser, TRole, TUserRole>)); 
 
-            List<object> action_titles = new List<object>();
+            List<Dictionary<string, string>> action_titles = new List<Dictionary<string, string>>();
             foreach (var controller_type in all_controller_types)
             {
 
                 MethodInfo[] actions = SRL.ActionManagement.Method.GetPublicMethods(controller_type);
                 if (actions.Any())
                 {
-                    var titles = actions.Select(x => new
+                    var titles = actions.Select(x => new Dictionary<string,string> ()
                     {
-                        name = x.Name,
-                        title = SRL.ActionManagement.Method.GetDisplayName(x)
+                        ["name"] = x.Name,
+                        ["title"] = SRL.ActionManagement.Method.GetDisplayName(x)
                     });
                     action_titles.AddRange(titles);
                 }
             }
+
+            var policies=SRL.Convertor.EnumToDictionary(policy_access_enum_type);
+            foreach (var item in policies)
+            { 
+                action_titles.Add(new Dictionary<string, string>()
+                {
+                    ["name"] = item.Key,
+                    ["title"] = item.Value
+                }) ;
+            }         
 
             return response.ToResponse(action_titles);
         }
