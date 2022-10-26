@@ -43,6 +43,11 @@ namespace SRLCore.Model
         { return null; }
     }
 
+    public class WebPageRequest : WebRequest
+    {  
+        public int page_start { get; set; } 
+        public int page_size { get; set; }
+    }
     public static class IQueryableExtensions
     {
         public static IQueryable<TModel> Paging<TModel>(this IQueryable<TModel> query, PagedResponse<object> response, int pageStart = 0, int pageSize = 0) where TModel : class

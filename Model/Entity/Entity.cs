@@ -91,6 +91,7 @@ namespace SRLCore.Model
             optionsBuilder.UseSqlServer(GetConnectionString());
             return SRL.ClassManagement.CreateInstance<TDb>(optionsBuilder.Options);
         }
+        
         public abstract void ModelCreator(ModelBuilder modelBuilder);
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
