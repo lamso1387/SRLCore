@@ -95,9 +95,9 @@ namespace SRLCore.Middleware
                         context.Session.SetString("Id", user.id.ToString());
                         context.Session.SetString("UserData", Newtonsoft.Json.JsonConvert.SerializeObject(user));
 
-                        bool need_access= context.NeedAccess(no_access_actions,  action);
+                        bool need_access = context.NeedAccess(no_access_actions, action);
                         bool has_authority = false;
-                        List<string> user_accesses = new List<string>(); 
+                        List<string> user_accesses = new List<string>();
                         if (action != "authenticate") has_authority = _userService.Authorization(action, user.id, out user_accesses);
 
                         if (has_authority == false && need_access) throw new GlobalException(ErrorCode.Forbidden);
@@ -127,22 +127,34 @@ namespace SRLCore.Middleware
                     string responseBody = new StreamReader(memStream,
                         encoding: Encoding.UTF8
                         , detectEncodingFromByteOrderMarks: false).ReadToEnd();
-                    if (context.Response.ContentType !=null? context.Response.ContentType.ToLower().Contains("application/json"): false)
+                    if (context.Response.ContentType != null ? context.Response.ContentType.ToLower().Contains("application/json") : false)
                         LogHandler.LogMethod(EventType.Return, Logger, action, context.Response.StatusCode,
                             Newtonsoft.Json.JsonConvert.DeserializeObject(SRL.Convertor.StringToRegx(responseBody)));
                     memStream.Position = 0;
                     await memStream.CopyToAsync(response_body);
                 }
                 finally
-                {
+                { 
                     context.Response.Body = response_body;
-
                 }
 
             }
 
 
         }
+
+        public byte[] ReadAllBytes(Stream instream)
+        {
+            if (instream is MemoryStream)
+                return ((MemoryStream)instream).ToArray();
+
+            using (var memoryStream = new MemoryStream())
+            {
+                instream.CopyTo(memoryStream);
+                return memoryStream.ToArray();
+            }
+        }
+
 
         protected Task HandleExceptionAsync(HttpContext context, Exception error)
         {

@@ -48,6 +48,8 @@ namespace SRLCore.Model
         AddRepeatedEntity = 5,
         [Description(@"{""message"":""مورد یافت نشد"" ,""status"": ""NoContent""}")]
         NoContent = HttpStatusCode.NoContent,
+        [Description(@"{""message"":""مورد یافت نشد"" ,""status"": ""BadRequest""}")]
+        ItemNotExists = 499,
         [Description(@"{""message"":""هزینه ابطال صندوق تعیین نشده است"" ,""status"": ""PreconditionFailed""}")]
         FundCancelCostNotSet = 7,
         [Description(@"{""message"":""سود سالانه تعیین نشده است"" ,""status"": ""PreconditionFailed""}")]

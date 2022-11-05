@@ -318,7 +318,7 @@ namespace SRLCore.Model
     public static class EntityExtensions
     {
         public static void ThrowIfNotExist(this CommonProperty existingEntity)
-        { if (existingEntity == null) throw new GlobalException(SRLCore.Model.ErrorCode.NoContent); }
+        { if (existingEntity == null) throw new GlobalException(SRLCore.Model.ErrorCode.ItemNotExists); }
 
 
 
