@@ -18,6 +18,7 @@ namespace SRLCore.Controllers
         protected readonly IDistributedCache _distributedCache;
         protected readonly ILogger Logger;
         protected readonly Tcontext Db;
+
         protected SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> _userService;
         public long user_session_id =>long.Parse(HttpContext.Session.GetString("Id"));
 
