@@ -27,7 +27,7 @@ namespace SRLCore.Model
     public class MessageResponse : IResponse
     {
 
-        public int? ErrorCode { get; set; }
+        public int? ErrorCode { get; set; } 
         public string ErrorMessage { get; set; }
         public string ErrorDetail { get; set; }
         public string ErrorData { get; set; }

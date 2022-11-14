@@ -39,7 +39,7 @@ namespace SRLCore.Model
         [Description(@"{""message"":""ورودی اشتباه است"" ,""status"": ""BadRequest""}")]
         BadRequest =HttpStatusCode.BadRequest,
         [Description(@"{""message"":""خطای غیرمنتظره رخ داده است لطفا مجددا تلاش کنید یا با پشتیبان تماس بگیرید"" ,""status"": ""InternalServerError""}")]
-        UnexpectedError =2,
+        UnexpectedError = HttpStatusCode.InternalServerError,
         [Description(@"{""message"":""اطلاعات ذخیره نشد مجددا تلاش کنید یا با پشتیبان تماس بگیرید"" ,""status"": ""ExpectationFailed""}")]
         DbSaveNotDone = 3,
         [Description(@"{""message"":""خطا در ذخیره سازی اطلاعات"" ,""status"": ""UnprocessableEntity""}")]

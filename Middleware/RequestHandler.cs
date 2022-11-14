@@ -114,28 +114,26 @@ namespace SRLCore.Middleware
 
                     await _next.Invoke(context);
 
-
                 }
 
                 catch (Exception error)
                 {
                     await HandleExceptionAsync(context, error);
                 }
+
                 try
                 {
                     memStream.Position = 0;
-                    string responseBody = new StreamReader(memStream,
-                        encoding: Encoding.UTF8
-                        , detectEncodingFromByteOrderMarks: false).ReadToEnd();
-                    if (context.Response.ContentType != null ? context.Response.ContentType.ToLower().Contains("application/json") : false)
-                        LogHandler.LogMethod(EventType.Return, Logger, action, context.Response.StatusCode,
-                            Newtonsoft.Json.JsonConvert.DeserializeObject(SRL.Convertor.StringToRegx(responseBody)));
+                    string responseBody = new StreamReader(memStream,encoding: Encoding.UTF8, detectEncodingFromByteOrderMarks: false).ReadToEnd();
                     memStream.Position = 0;
                     await memStream.CopyToAsync(response_body);
-                }
-                finally
-                { 
+
                     context.Response.Body = response_body;
+
+                }
+                catch (Exception error)
+                {
+                    await HandleExceptionAsync(context, error);
                 }
 
             }
@@ -162,26 +160,22 @@ namespace SRLCore.Middleware
             if (!context.Response.HasStarted)
             {
                 MessageResponse mes_res = new MessageResponse();
-                string message = error.Message;
-                int code = -1;
+                mes_res.ErrorMessage = error.Message;
+                mes_res.ErrorDetail = error.InnerException?.Message;
+                mes_res.ErrorCode = (int)ErrorCode.UnexpectedError;
+                context.Response.StatusCode = (int)ErrorCode.UnexpectedError;
                 switch (error.GetType().Name)
                 {
                     case nameof(GlobalException):
-                        var error_code = EnumConvert.StringToEnum<ErrorCode>(error.Message);
+                        ErrorCode error_code = EnumConvert.StringToEnum<ErrorCode>(error.Message);
                         var error_prop = ErrorProp.GetError(error_code);
+
                         context.Response.StatusCode = (int)error_prop.status;
-                        message = error_prop.message;
-                        code = (int)error_code;
-                        if (error.InnerException?.Message != null) message = error.InnerException.Message;
-                        break;
-                    default:
-                        context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-                        if (error.InnerException?.Message != null) mes_res.ErrorDetail = error.InnerException.Message;
+                        mes_res.ErrorMessage = error_prop.message;
+                        mes_res.ErrorCode = (int)error_code;
                         break;
                 }
                 context.Response.ContentType = "application/json";
-                mes_res.ErrorMessage = message;
-                mes_res.ErrorCode = code;
                 output = JsonSerializer.Serialize(mes_res);
             }
             return context.Response.WriteAsync(output);
