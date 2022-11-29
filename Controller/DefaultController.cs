@@ -38,7 +38,7 @@ namespace SRLCore.Controllers
         {
             SingleResponse<object> response = new SingleResponse<object>();
 
-            request.CheckValidation(response);
+            request.CheckValidation();
 
             var entity = request.ToEntity2<EntityT>();
 
@@ -62,7 +62,7 @@ namespace SRLCore.Controllers
         {
             SingleResponse<object> response = new SingleResponse<object>();
 
-            request.CheckValidation(response);
+            request.CheckValidation();
             existingEntityAfterEdit.ThrowIfNotExist(); 
 
             await UpdateSave(Db);

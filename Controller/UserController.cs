@@ -139,7 +139,7 @@ namespace SRLCore.Controllers
 
 
             request.pass_mode = PassMode.add;
-            request.CheckValidation(response);
+            request.CheckValidation();
 
             var user = RequestToEntity(request);
 
@@ -213,7 +213,7 @@ namespace SRLCore.Controllers
             try
             {
 
-                request.CheckValidation(response);
+                request.CheckValidation();
 
                 var entity = RequestToEntity(request);
                 entity.id = request.id;

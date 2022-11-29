@@ -100,7 +100,7 @@ namespace SRLCore.Controllers
             SingleResponse<object> response = new SingleResponse<object>();
 
 
-            request.CheckValidation(response);
+            request.CheckValidation();
 
             var entiry = RequestToEntity(request);
 
@@ -218,7 +218,7 @@ namespace SRLCore.Controllers
         {
 
             SingleResponse<object> response = new SingleResponse<object>();
-            request.CheckValidation(response);
+            request.CheckValidation();
 
             var entiry = RequestToEntity(request, request.id);
 

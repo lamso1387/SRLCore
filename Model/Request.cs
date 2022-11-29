@@ -19,7 +19,7 @@ namespace SRLCore.Model
     public abstract class WebRequest
     {
         public long id { get; set; }
-        public void CheckValidation(IResponse response)
+        public void CheckValidation()
         {
             if (CheckAttrbuteValidation())
                 if (CheckPropertyValidation())
