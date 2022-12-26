@@ -173,6 +173,7 @@ namespace SRLCore.Middleware
                         context.Response.StatusCode = (int)error_prop.status;
                         mes_res.ErrorMessage = error_prop.message;
                         mes_res.ErrorCode = (int)error_code;
+                        if (!string.IsNullOrWhiteSpace(mes_res.ErrorDetail)) mes_res.ErrorMessage = mes_res.ErrorDetail;
                         break;
                 }
                 context.Response.ContentType = "application/json";
