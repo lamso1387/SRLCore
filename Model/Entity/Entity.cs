@@ -158,10 +158,10 @@ namespace SRLCore.Model
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public async Task<int> UpdateSave()
+        public async Task<int> UpdateSave(bool throw_if_not_saved=true)
         {
             int save = await SaveChangesAsync();
-            if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
+            if (save == 0 && throw_if_not_saved) throw new GlobalException(ErrorCode.DbSaveNotDone);
             else return save;
 
         }
