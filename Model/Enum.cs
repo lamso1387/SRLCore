@@ -72,6 +72,13 @@ namespace SRLCore.Model
 
     }
 
+    public enum AppLogType
+    {
+        start=0,
+        end=1
+
+    }
+
 
     public class EnumConvert
     {

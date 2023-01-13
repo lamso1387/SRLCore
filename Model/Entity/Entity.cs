@@ -262,15 +262,16 @@ namespace SRLCore.Model
     public abstract class IUserRole : CommonProperty
     {
         public abstract long user_id { get; set; }
-        public abstract long role_id { get; set; }
+        public abstract long role_id { get; set; } 
 
     }
+    
     public abstract class IRole : CommonProperty
     { 
         public abstract string name { get; set; }
-        public abstract string accesses { get; set; }
+        public abstract string accesses { get; set; } 
 
-    }
+    } 
     public abstract class IUser : CommonProperty
     {
         public abstract string username { get; set; }
