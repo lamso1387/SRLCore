@@ -10,9 +10,9 @@ namespace SRLCore.Model
 {
     public abstract class SettingClass 
     {
-        public string db_connection;
-        public string log_file_path;
-        public long admin_user_id;
+        public string db_connection { get; set; }
+        public string log_file_path { get; set; }
+        public long admin_user_id { get; set; }
 
     }
 }
