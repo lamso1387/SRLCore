@@ -130,14 +130,9 @@ namespace SRLCore.Controllers
         [HttpPost("add")]
         [DisplayName("افزودن کاربر")]
         public async Task<IActionResult> AddUser([FromBody] AddUserRequest request)
-        {
-            string method = nameof(AddUser);
-            LogHandler.LogMethod(EventType.Call, Logger, method, request);
-
+        { 
             SingleResponse<object> response = new SingleResponse<object>();
-
-
-
+             
             request.pass_mode = PassMode.add;
             request.CheckValidation();
 
@@ -154,6 +149,7 @@ namespace SRLCore.Controllers
 
             await Db.AddAsync(user);
             int save = await Db.SaveChangesAsync();
+
             if (save == 0)
             {
                 response.ErrorCode = (int)ErrorCode.DbSaveNotDone;

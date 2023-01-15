@@ -16,15 +16,17 @@ using System.IO;
 
 namespace SRLCore.Model
 {
+   
+
     public abstract class WebRequest
     {
-        public long id { get; set; }
+        public long? id { get; set; }
         public void CheckValidation()
         {
             if (CheckAttrbuteValidation())
                 if (CheckPropertyValidation())
                 {
-                    // if (!UserSession.HasNonActionAccess(NonActionAccess.AllData)) CheckAccessValidation();
+                    
                 }
             if (validation_errors.Any())
                 throw new GlobalException(ErrorCode.BadRequest, validation_errors.First());
@@ -41,6 +43,7 @@ namespace SRLCore.Model
         public virtual EntityT ToEntity2<EntityT>(long? edit_id = null)
             where EntityT : CommonProperty
         { return null; }
+         
     }
 
     public class WebPageRequest : WebRequest

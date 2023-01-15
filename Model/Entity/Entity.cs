@@ -14,6 +14,7 @@ using System.IO;
 using System.Data;
 using System.Data.SqlClient;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using System.Reflection;
 
 namespace SRLCore.Model
 {
@@ -91,7 +92,7 @@ namespace SRLCore.Model
             optionsBuilder.UseSqlServer(GetConnectionString());
             return SRL.ClassManagement.CreateInstance<TDb>(optionsBuilder.Options);
         }
-        
+
         public abstract void ModelCreator(ModelBuilder modelBuilder);
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -100,7 +101,7 @@ namespace SRLCore.Model
         }
         public virtual void Configuration(DbContextOptionsBuilder optionsBuilder) { }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        { 
+        {
             optionsBuilder.EnableSensitiveDataLogging();
             Configuration(optionsBuilder);
             base.OnConfiguring(optionsBuilder);
@@ -116,9 +117,9 @@ namespace SRLCore.Model
 
 
         public string GetTableName<T>() where T : class
-        {   
+        {
             var entityTypes = Model.GetEntityTypes();
-             
+
             var entityTypeOfT = entityTypes.First(t => t.ClrType == typeof(T));
 
             var tableNameAnnotation = entityTypeOfT.GetAnnotation("Relational:TableName");
@@ -141,7 +142,7 @@ namespace SRLCore.Model
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public async Task<int> AddRangeSave<T>(List<T> entity_list) where T:class
+        public async Task<int> AddRangeSave<T>(List<T> entity_list) where T : class
         {
             //Set<T>().AddRange(request);
             //SaveChanges();
@@ -158,7 +159,7 @@ namespace SRLCore.Model
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public async Task<int> UpdateSave(bool throw_if_not_saved=true)
+        public async Task<int> UpdateSave(bool throw_if_not_saved = true)
         {
             int save = await SaveChangesAsync();
             if (save == 0 && throw_if_not_saved) throw new GlobalException(ErrorCode.DbSaveNotDone);
@@ -256,22 +257,23 @@ namespace SRLCore.Model
             get => SRL.Convertor.StringToEnum<EntityStatus>(status);
             set { status = value.ToString(); }
         }
+
     }
 
 
     public abstract class IUserRole : CommonProperty
     {
         public abstract long user_id { get; set; }
-        public abstract long role_id { get; set; } 
+        public abstract long role_id { get; set; }
 
     }
-    
-    public abstract class IRole : CommonProperty
-    { 
-        public abstract string name { get; set; }
-        public abstract string accesses { get; set; } 
 
-    } 
+    public abstract class IRole : CommonProperty
+    {
+        public abstract string name { get; set; }
+        public abstract string accesses { get; set; }
+
+    }
     public abstract class IUser : CommonProperty
     {
         public abstract string username { get; set; }
@@ -281,13 +283,26 @@ namespace SRLCore.Model
         public abstract byte[] password_hash { get; set; }
         public abstract string password { get; set; }
         public abstract byte[] password_salt { get; set; }
-        /// <summary>
-        ///implementation: { get => $"{first_name} {last_name}"; }
-        /// </summary>
         public abstract string full_name { get; }
         public abstract bool? change_pass_next_login { get; set; }
         public abstract DateTime? last_login { get; set; }
+        [NotMapped]
+        public string[] columns_seed { get; set; } =
+         new string[] { nameof(creator_id), nameof(create_date), nameof(status), nameof(first_name), nameof(last_name), nameof(mobile), nameof(password_hash), nameof(password_salt) };
 
+
+        public void SetAdminSeed(string pass = null)
+        {
+            creator_id = 1;
+            create_date = DateTime.Now;
+            status = EntityStatus.active.ToString();
+            first_name = "admin";
+            last_name = "admin";
+            mobile = "09000000000";
+            if (pass == null) password = "12345678";
+            else password = pass;
+            UpdatePasswordHash();
+        }
         public static void CreatePasswordHashS(string password, out byte[] passwordHash, out byte[] passwordSalt)
         {
             using (var hmac = new System.Security.Cryptography.HMACSHA512())
@@ -305,9 +320,6 @@ namespace SRLCore.Model
                 password_salt = passwordSalt;
             }
         }
-
-
-
     }
 
     public abstract class IProvince : CommonProperty

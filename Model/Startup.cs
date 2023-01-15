@@ -5,12 +5,14 @@ using System.Text;
 using System.Linq;
 using Microsoft.AspNetCore.Http;
 using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace SRLCore.Model
 {
 
     public abstract class SrlStartup<T> where T : SettingClass
-    {
+    { 
+
         public virtual string setting_file_name { get; set; } = @"setting.json"; 
         public static T setting;
         public virtual void LoadSetting()

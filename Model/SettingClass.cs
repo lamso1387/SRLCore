@@ -13,6 +13,8 @@ namespace SRLCore.Model
         public string db_connection { get; set; }
         public string log_file_path { get; set; }
         public long admin_user_id { get; set; }
+        public string seeder_username { get; set; }
+        public string seeder_password { get; set; }
 
     }
 }
