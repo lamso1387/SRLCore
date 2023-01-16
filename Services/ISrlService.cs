@@ -38,7 +38,7 @@ namespace SRLCore.Services
         }
         public HttpClient CreateClient(string type)
         {
-            var client = _clientFactory.CreateClient(type.ToString()); 
+            var client = _clientFactory.CreateClient(type); 
             return client;
         }
         public void ThrowError()

@@ -34,7 +34,7 @@ namespace SRLCore.Model
                 log += $"data:{ Newtonsoft.Json.JsonConvert.SerializeObject(data)};";
 
             log += $"date:{DateTime.Now}";
-
+             
             System.IO.File.AppendAllText(setting.log_file_path, Environment.NewLine + log);
         }
 

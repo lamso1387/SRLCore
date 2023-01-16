@@ -21,6 +21,8 @@ namespace SRLCore.Controllers
 
         protected SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> _userService;
         public long user_session_id => long.Parse(HttpContext.Session.GetString("Id"));
+        public TUser user_session => Newtonsoft.Json.JsonConvert.DeserializeObject<TUser>(HttpContext.Session.GetString("UserData"));
+
 
         public CommonController(IDistributedCache distributedCache,
         ILogger<CommonController<Tcontext, TUser, TRole, TUserRole>> logger, Tcontext dbContext,
@@ -114,13 +116,13 @@ namespace SRLCore.Controllers
     {
 
 
-        protected virtual void SetAddEditProperty(TEntity entity, long? edit_id)
+        protected virtual void SetAddEditProperty(TEntity entity, RequestType type, long? edit_id)
         {
-            if (edit_id == null)
+            if (type==RequestType.add)
             {
                 entity.creator_id = user_session_id;
             }
-            else
+            else if(type == RequestType.edit)
             {
                 entity.modifier_id = user_session_id;
                 entity.modify_date = DateTime.Now;
@@ -129,10 +131,10 @@ namespace SRLCore.Controllers
         }
         protected abstract TEntity RequestToEntity (TRequest request);
 
-        protected virtual TEntity CreateEntityFromRequest(TRequest request)
+        protected virtual TEntity CreateEntityFromRequest(TRequest request, RequestType type)
         {
             TEntity entity = RequestToEntity(request);
-            SetAddEditProperty(entity, request.id);
+            SetAddEditProperty(entity, type, request.id);
             return entity;
         }
 

@@ -78,6 +78,12 @@ namespace SRLCore.Model
         end=1
 
     }
+    public enum RequestType
+    {
+        add = 0,
+        edit = 1
+
+    }
 
 
     public class EnumConvert

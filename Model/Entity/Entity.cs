@@ -203,7 +203,7 @@ namespace SRLCore.Model
             return GetUsers(request.id);
 
         }
-        public virtual async Task<TUser> GetUser(long id, string username)
+        public virtual async Task<TUser> GetUser(long id, string username=null)
         => await Users.FirstOrDefaultAsync(item => item.id == id || (item.username == username));
 
 

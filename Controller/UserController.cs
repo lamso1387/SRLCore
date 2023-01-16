@@ -212,7 +212,7 @@ namespace SRLCore.Controllers
                 request.CheckValidation();
 
                 var entity = RequestToEntity(request);
-                entity.id = request.id;
+                entity.id =(long) request.id;
 
                 var existingEntity = await Db.GetUser(entity.id, entity.username);
                 if (existingEntity == null)
