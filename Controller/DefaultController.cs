@@ -137,6 +137,16 @@ namespace SRLCore.Controllers
             SetAddEditProperty(entity, type, request.id);
             return entity;
         }
+        protected async virtual Task<TEntity> AddEntity(TRequest request, Tcontext db )
+        {
+            request.CheckValidation();
+
+            var entity = CreateEntityFromRequest(request, RequestType.add);
+
+            await db.AddSave(entity);
+            
+            return entity;
+        }
 
         public CommonController(IDistributedCache distributedCache,
         ILogger<CommonController<Tcontext, TUser, TRole, TUserRole, TEntity, TRequest>> logger, Tcontext dbContext,
