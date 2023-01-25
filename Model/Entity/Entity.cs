@@ -242,7 +242,8 @@ namespace SRLCore.Model
         [Required]
         public virtual string status { get; set; } = EntityStatus.active.ToString();
         [NotMapped]
-        [JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
+        [Newtonsoft.Json.JsonIgnore]
         public virtual Func<CommonProperty, object> Selector => x => new
         {
             x.id,
@@ -251,6 +252,7 @@ namespace SRLCore.Model
             x.modifier_id,
             x.modify_date
         };
+
         [NotMapped]
         public virtual EntityStatus status_enum
         {

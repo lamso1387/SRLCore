@@ -85,6 +85,13 @@ namespace SRLCore.Model
 
     }
 
+    public enum DotNetCoreVersion
+    {
+        core2_1 = 0,
+        core5_0 = 1
+
+    }
+
 
     public class EnumConvert
     {

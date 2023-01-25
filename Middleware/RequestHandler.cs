@@ -28,15 +28,18 @@ using System.Globalization;
 using SRLCore.Model;
 using SRLCore.Services;
 using System.Text.Json;
+using Microsoft.EntityFrameworkCore.Internal;
+using Microsoft.AspNetCore.Razor.Language.CodeGeneration;
 
 namespace SRLCore.Middleware
 {
-    public class HandlerMiddleware<Tcontext, TUser, TRole, TUserRole>
+    public abstract class HandlerMiddleware<Tcontext, TUser, TRole, TUserRole>
         where TUser : IUser where TRole : IRole where TUserRole : IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
     {
         public virtual string[] no_auth_actions => new string[] { "" };
         public virtual string[] no_access_actions => new string[] { "" };
+        public abstract DotNetCoreVersion dotnet_core_version { get; }
 
         protected readonly RequestDelegate _next;
 
@@ -55,9 +58,7 @@ namespace SRLCore.Middleware
                 string action = null;
                 try
                 {
-
-
-                    bool need_auth = context.NeedAuth(no_auth_actions, ref action);
+                    bool need_auth  = context.NeedAuth(no_auth_actions, ref action); 
                     context.Request.EnableBuffering();
                     using (var reader = new StreamReader(
                         context.Request.Body,
@@ -126,10 +127,8 @@ namespace SRLCore.Middleware
                     memStream.Position = 0;
                     string responseBody = new StreamReader(memStream,encoding: Encoding.UTF8, detectEncodingFromByteOrderMarks: false).ReadToEnd();
                     memStream.Position = 0;
-                    await memStream.CopyToAsync(response_body);
-
-                    context.Response.Body = response_body;
-
+                    await memStream.CopyToAsync(response_body); 
+                    context.Response.Body = response_body; 
                 }
                 catch (Exception error)
                 {

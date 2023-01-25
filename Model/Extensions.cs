@@ -24,13 +24,14 @@ namespace SRLCore.Model
     {
         public static string GetActionName(this HttpContext context)
         {
+            
             return context.GetRouteData().Values["action"].ToString();
         }
         public static bool NeedAuth(this HttpContext context,string[] no_auth_actions, ref string action)
         {
             action = context.GetActionName();
             return !no_auth_actions.Contains(action);
-        }
+        } 
         public static bool NeedAccess(this HttpContext context, string[] no_access_actions, string action)
         { 
             return !no_access_actions.Contains(action);
