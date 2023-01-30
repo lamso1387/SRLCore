@@ -19,8 +19,7 @@ using System.Reflection;
 namespace SRLCore.Model
 {
     public abstract class DbEntity<TDb> : DbContext, IDbContext where TDb : DbContext
-    {
-
+    { 
         public DbEntity(DbContextOptions<TDb> options)
          : base(options)
         {
@@ -106,6 +105,8 @@ namespace SRLCore.Model
             Configuration(optionsBuilder);
             base.OnConfiguring(optionsBuilder);
         }
+
+        
         /// <summary>
         /// (builder.Property(e => e.mobile), 11)
         /// </summary>
@@ -181,7 +182,7 @@ namespace SRLCore.Model
         public virtual DbSet<TUser> Users { get; set; }
         public virtual DbSet<TRole> Roles { get; set; }
         public virtual DbSet<TUserRole> UserRoles { get; set; }
-
+        
         public DbEntity(DbContextOptions<TDb> options)
          : base(options)
         {
@@ -225,6 +226,8 @@ namespace SRLCore.Model
 
         public virtual IQueryable<TUserRole> GetUserRoles(long role_id)
 => UserRoles.Where(item => item.role_id == role_id).AsQueryable();
+
+
 
 
     }
@@ -293,7 +296,7 @@ namespace SRLCore.Model
          new string[] { nameof(creator_id), nameof(create_date), nameof(status), nameof(first_name), nameof(last_name), nameof(mobile), nameof(password_hash), nameof(password_salt) };
 
 
-        public void SetAdminSeed(string pass = null)
+        public void SetAdminSeed(string user_name=null, string pass = null)
         {
             creator_id = 1;
             create_date = DateTime.Now;
@@ -303,6 +306,8 @@ namespace SRLCore.Model
             mobile = "09000000000";
             if (pass == null) password = "12345678";
             else password = pass;
+            if (user_name == null) username = "admin";
+            else username = user_name;
             UpdatePasswordHash();
         }
         public static void CreatePasswordHashS(string password, out byte[] passwordHash, out byte[] passwordSalt)

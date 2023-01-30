@@ -8,13 +8,19 @@ using System.IO;
 
 namespace SRLCore.Model
 {
-    public abstract class SettingClass 
+    public abstract class SettingClass
     {
         public string db_connection { get; set; }
         public string log_file_path { get; set; }
-        public long admin_user_id { get; set; }
-        public string seeder_username { get; set; }
-        public string seeder_password { get; set; }
+        public virtual Seeder seeder { get; set; }
+
+        public class Seeder
+        {
+            public long admin_user_id { get; set; }
+            public string admin_seeder_username { get; set; }
+            public string admin_seeder_password { get; set; }
+
+        }
 
     }
 }

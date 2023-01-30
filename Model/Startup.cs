@@ -6,6 +6,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Http;
 using System.IO;
 using Microsoft.Extensions.Configuration;
+ 
 
 namespace SRLCore.Model
 {
@@ -15,6 +16,7 @@ namespace SRLCore.Model
 
         public virtual string setting_file_name { get; set; } = @"setting.json"; 
         public static T setting;
+        
         public virtual void LoadSetting()
         {
             TextReader tr = new StreamReader(setting_file_name);
