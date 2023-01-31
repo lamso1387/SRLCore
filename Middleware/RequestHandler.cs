@@ -163,16 +163,27 @@ namespace SRLCore.Middleware
                 mes_res.ErrorDetail = error.InnerException?.Message;
                 mes_res.ErrorCode = (int)ErrorCode.UnexpectedError;
                 context.Response.StatusCode = (int)ErrorCode.UnexpectedError;
+                ErrorCode error_code;
+                ErrorProp error_prop;
                 switch (error.GetType().Name)
                 {
                     case nameof(GlobalException):
-                        ErrorCode error_code = EnumConvert.StringToEnum<ErrorCode>(error.Message);
-                        var error_prop = ErrorProp.GetError(error_code);
+                        error_code = EnumConvert.StringToEnum<ErrorCode>(error.Message);
+                        error_prop = ErrorProp.GetError(error_code);
 
                         context.Response.StatusCode = (int)error_prop.status;
                         mes_res.ErrorMessage = error_prop.message;
                         mes_res.ErrorCode = (int)error_code;
                         if (!string.IsNullOrWhiteSpace(mes_res.ErrorDetail)) mes_res.ErrorMessage = mes_res.ErrorDetail;
+                        break;
+                    case nameof(InvalidOperationException):
+                        error_code = ErrorCode.BadRequest;
+                        error_prop = ErrorProp.GetError(error_code);
+                        context.Response.StatusCode = (int)error_prop.status;
+                        mes_res.ErrorMessage = error_prop.message;
+                        mes_res.ErrorCode = (int)error_code;
+                        if (!string.IsNullOrWhiteSpace(mes_res.ErrorDetail)) mes_res.ErrorMessage = mes_res.ErrorDetail;
+                        else mes_res.ErrorDetail = error.Message;
                         break;
                 }
                 context.Response.ContentType = "application/json";
