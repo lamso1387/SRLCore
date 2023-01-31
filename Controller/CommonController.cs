@@ -11,7 +11,7 @@ using SRLCore.Middleware;
 namespace SRLCore.Controllers
 {
 
-    public class CommonController<Tcontext, TUser, TRole, TUserRole> : ControllerBase
+    public abstract class CommonController<Tcontext, TUser, TRole, TUserRole> : ControllerBase
         where TUser : IUser where TRole : IRole where TUserRole : IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
     {
@@ -19,14 +19,14 @@ namespace SRLCore.Controllers
         protected readonly ILogger Logger;
         protected readonly Tcontext Db;
 
-        protected SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> _userService;
+        protected Services.UserService<Tcontext, TUser, TRole, TUserRole> _userService;
         public long user_session_id => long.Parse(HttpContext.Session.GetString("Id"));
         public TUser user_session => Newtonsoft.Json.JsonConvert.DeserializeObject<TUser>(HttpContext.Session.GetString("UserData"));
 
 
         public CommonController(IDistributedCache distributedCache,
         ILogger<CommonController<Tcontext, TUser, TRole, TUserRole>> logger, Tcontext dbContext,
-        SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
+        Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
         {
             _distributedCache = distributedCache;
             Logger = logger;
@@ -106,54 +106,5 @@ namespace SRLCore.Controllers
 
 
     }
-
-    public abstract class CommonController<Tcontext, TUser, TRole, TUserRole, TEntity, TRequest> :
-         CommonController<Tcontext, TUser, TRole, TUserRole>
-        where TUser : IUser where TRole : IRole where TUserRole : IUserRole
-        where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
-        where TEntity : ICommonProperty
-         where TRequest : WebRequest
-    {
-
-
-        protected virtual void SetAddEditProperty(TEntity entity, RequestType type, long? edit_id)
-        {
-            if (type==RequestType.add)
-            {
-                entity.creator_id = user_session_id;
-            }
-            else if(type == RequestType.edit)
-            {
-                entity.modifier_id = user_session_id;
-                entity.modify_date = DateTime.Now;
-                entity.id = (long)edit_id;
-            }
-        }
-        protected abstract TEntity RequestToEntity (TRequest request);
-
-        protected virtual TEntity CreateEntityFromRequest(TRequest request, RequestType type)
-        {
-            TEntity entity = RequestToEntity(request);
-            SetAddEditProperty(entity, type, request.id);
-            return entity;
-        }
-        protected async virtual Task<TEntity> AddEntity(TRequest request, Tcontext db )
-        {
-            request.CheckValidation();
-
-            var entity = CreateEntityFromRequest(request, RequestType.add);
-
-            await db.AddSave(entity);
-            
-            return entity;
-        }
-
-        public CommonController(IDistributedCache distributedCache,
-        ILogger<CommonController<Tcontext, TUser, TRole, TUserRole, TEntity, TRequest>> logger, Tcontext dbContext,
-        SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> userService) :
-            base(distributedCache, logger, dbContext, userService)
-        {
-        }
-
-    }
+     
 }
