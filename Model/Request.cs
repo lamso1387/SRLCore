@@ -22,7 +22,7 @@ namespace SRLCore.Model
     {
         public long? id { get; set; } 
         public void CheckValidation()
-        {
+        { 
             if (CheckAttrbuteValidation())
                 if (CheckPropertyValidation())
                 {

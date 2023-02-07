@@ -20,20 +20,29 @@ namespace SRLCore.Controllers
     {
 
 
+      
+
+        public CommonEntityRequestController(IDistributedCache distributedCache,
+        ILogger<CommonEntityRequestController<Tcontext, TUser, TRole, TUserRole, TEntity, TRequest>> logger, Tcontext dbContext,
+        Services.UserService<Tcontext, TUser, TRole, TUserRole> userService) :
+            base(distributedCache, logger, dbContext, userService)
+        {
+        }
+
         protected virtual void SetAddEditProperty(TEntity entity, RequestType type, long? edit_id)
         {
-            if (type==RequestType.add)
+            if (type == RequestType.add)
             {
                 entity.creator_id = user_session_id;
             }
-            else if(type == RequestType.edit)
+            else if (type == RequestType.edit)
             {
                 entity.modifier_id = user_session_id;
                 entity.modify_date = DateTime.Now;
                 entity.id = (long)edit_id;
             }
         }
-        protected abstract TEntity RequestToEntity (TRequest request);
+        protected abstract TEntity RequestToEntity(TRequest request);
 
         protected virtual TEntity CreateEntityFromRequest(TRequest request, RequestType type)
         {
@@ -41,22 +50,21 @@ namespace SRLCore.Controllers
             SetAddEditProperty(entity, type, request.id);
             return entity;
         }
-        protected async virtual Task<TEntity> AddEntity(TRequest request, Tcontext db )
+        protected async virtual Task<TEntity> AddEntity(TRequest request, Tcontext db)
         {
+            ThrowEmptyRequest(request);
             request.CheckValidation();
 
             var entity = CreateEntityFromRequest(request, RequestType.add);
 
             await db.AddSave(entity);
-            
+
             return entity;
         }
 
-        public CommonEntityRequestController(IDistributedCache distributedCache,
-        ILogger<CommonEntityRequestController<Tcontext, TUser, TRole, TUserRole, TEntity, TRequest>> logger, Tcontext dbContext,
-        Services.UserService<Tcontext, TUser, TRole, TUserRole> userService) :
-            base(distributedCache, logger, dbContext, userService)
+        protected virtual void ThrowEmptyRequest(TRequest request)
         {
+            if (request == null) throw new GlobalException(ErrorCode.BadRequest);
         }
 
     }
