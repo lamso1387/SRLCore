@@ -19,11 +19,12 @@ namespace SRLCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class UserController<Tcontext, TUser, TRole, TUserRole> : CommonController<Tcontext, TUser, TRole, TUserRole>
+    public abstract class UserController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest> : CommonEntityRequestController<Tcontext, TUser, TRole, TUserRole,TUser,TAddUserRequest>
         where TUser : IUser where TRole : IRole where TUserRole : IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
+        where TAddUserRequest:AddUserRequest
     {
-        protected virtual TUser RequestToEntity(AddUserRequest requst) { return null; }
+        protected abstract void EditUserFieldFromRequest(TUser existing_entity, TUser new_entity);
         public static Func<TUser, object> OrderBurberrySelector => x => new
         {
             x.id,
@@ -36,7 +37,7 @@ namespace SRLCore.Controllers
             x.username,
         };
         public UserController(IDistributedCache distributedCache,
-            ILogger<UserController<Tcontext, TUser, TRole, TUserRole>> logger, Tcontext dbContext,
+            ILogger<UserController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest>> logger, Tcontext dbContext,
             SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
              : base(distributedCache, logger, dbContext, userService)
         {
@@ -129,10 +130,10 @@ namespace SRLCore.Controllers
 
         [HttpPost("add")]
         [DisplayName("افزودن کاربر")]
-        public async Task<IActionResult> AddUser([FromBody] AddUserRequest request)
-        { 
+        public async Task<IActionResult> AddUser([FromBody] TAddUserRequest request)
+        {
             SingleResponse<object> response = new SingleResponse<object>();
-             
+
             request.pass_mode = PassMode.add;
             request.CheckValidation();
 
@@ -200,7 +201,7 @@ namespace SRLCore.Controllers
 
         [DisplayName("ویرایش کاربر")]
         [HttpPut("edit")]
-        public async Task<IActionResult> EditUser([FromBody] AddUserRequest request)
+        public async Task<IActionResult> EditUser([FromBody] TAddUserRequest request)
         {
             string method = nameof(EditUser);
             LogHandler.LogMethod(EventType.Call, Logger, method, request);
@@ -212,7 +213,7 @@ namespace SRLCore.Controllers
                 request.CheckValidation();
 
                 var entity = RequestToEntity(request);
-                entity.id =(long) request.id;
+                entity.id = (long)request.id;
 
                 var existingEntity = await Db.GetUser(entity.id, entity.username);
                 if (existingEntity == null)
@@ -221,11 +222,11 @@ namespace SRLCore.Controllers
                     return response.ToHttpResponse(Logger, Request.HttpContext);
                 }
 
-                existingEntity.first_name = entity.first_name;
-                existingEntity.last_name = entity.last_name;
-                existingEntity.mobile = entity.mobile;
-                //existingEntity.national_code = entity.national_code;
-                existingEntity.password = entity.password;
+                EditUserFieldFromRequest(existingEntity, entity);
+                //existingEntity.first_name = entity.first_name;
+                //existingEntity.last_name = entity.last_name;
+                //existingEntity.mobile = entity.mobile; 
+                //existingEntity.password = entity.password;
 
                 existingEntity.UpdatePasswordHash();
 
@@ -251,7 +252,7 @@ namespace SRLCore.Controllers
         [DisplayName("مشاهده کاربر")]
         public async Task<IActionResult> GetUser(long id)
         {
-            SingleResponse<object> response = new SingleResponse<object>(); 
+            SingleResponse<object> response = new SingleResponse<object>();
             var existingEntity = await Db.GetUser(id, null);
             existingEntity.ThrowIfNotExist();
 

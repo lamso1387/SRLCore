@@ -22,9 +22,10 @@ namespace SRLCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class RoleController<Tcontext, TUser, TRole, TUserRole> : CommonController<Tcontext, TUser, TRole, TUserRole>
+    public abstract class RoleController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest> : CommonController<Tcontext, TUser, TRole, TUserRole>
         where TUser : IUser where TRole : IRole where TUserRole : IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
+        where TAddUserRequest:AddUserRequest
     {
         protected abstract TRole RequestToEntity(AddRoleRequest requst, long? edit_id = null);
         protected abstract TUserRole CreateUserRole(TRole role, TUser user);
@@ -68,7 +69,7 @@ namespace SRLCore.Controllers
         //Assembly.GetAssembly(typeof(CommonController<Tcontext, TUser, TRole, TUserRole>))
 
         public RoleController(IDistributedCache distributedCache,
-        ILogger<RoleController<Tcontext, TUser, TRole, TUserRole>> logger, Tcontext dbContext,
+        ILogger<RoleController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest>> logger, Tcontext dbContext,
         SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
          : base(distributedCache, logger, dbContext, userService)
         {
@@ -287,8 +288,8 @@ namespace SRLCore.Controllers
             List<Type> all_controller_types = SRL.ChildParent
                 .GetAllChildrenClasses<CommonController<Tcontext, TUser, TRole, TUserRole>>(CurrentAssembly);
 
-            all_controller_types.Add(typeof(UserController<Tcontext, TUser, TRole, TUserRole>));
-            all_controller_types.Add(typeof(RoleController<Tcontext, TUser, TRole, TUserRole>)); 
+            all_controller_types.Add(typeof(UserController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest>));
+            all_controller_types.Add(typeof(RoleController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest>)); 
 
             List<Dictionary<string, string>> action_titles = new List<Dictionary<string, string>>();
             foreach (var controller_type in all_controller_types)
