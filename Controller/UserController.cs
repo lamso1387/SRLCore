@@ -25,17 +25,11 @@ namespace SRLCore.Controllers
         where TAddUserRequest:AddUserRequest
     {
         protected abstract void EditUserFieldFromRequest(TUser existing_entity, TUser new_entity);
-        public static Func<TUser, object> OrderBurberrySelector => x => new
+        protected virtual object UserSessionData(TUser user)
         {
-            x.id,
-            x.create_date,
-            x.creator_id,
-            x.status,
-            x.first_name,
-            x.last_name,
-            x.mobile,
-            x.username,
-        };
+            return new List<TUser> { user }.Select(x =>   new { x.id, x.first_name, x.last_name, x.create_date, x.full_name, x.mobile }).First();
+        }
+
         public UserController(IDistributedCache distributedCache,
             ILogger<UserController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest>> logger, Tcontext dbContext,
             SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
@@ -46,40 +40,30 @@ namespace SRLCore.Controllers
 
         [HttpPost("authenticatepost")]
         [DisplayName("احراز هویت")]
-        public async Task<IActionResult> AuthenticatePost([FromBody] TUser user)
+        public virtual async Task<IActionResult> AuthenticatePost([FromBody] TUser user)
         {
-            string method = nameof(AuthenticatePost);
-            LogHandler.LogMethod(EventType.Call, Logger, method, user);
-            SingleResponse<object> response = new SingleResponse<object>();
-            try
+            var response = new SingleResponse<object>();
+            user = await _userService.Authenticate(user?.username, user?.password);
+
+            if (user == null)
+                throw new Middleware.GlobalException(ErrorCode.Unauthorized);
+
+            List<string> user_accesses =UserSession.GetAccesses(Db, user.id);
+
+
+            var user_data = UserSessionData(user);
+
+            Dictionary<string, object> Session = new Dictionary<string, object>
             {
-                user = await _userService.Authenticate(user?.username, user?.password);
+                ["Id"] = user.id,
+                ["Accesses"] = user_accesses,
+                ["UserData"] = user_data
+            };
 
-                if (user == null)
-                {
-                    response.ErrorCode = (int)ErrorCode.Unauthorized;
-                    return response.ToHttpResponse(Logger, Request.HttpContext);
-                }
-                var http_se = HttpContext.Session;
-
-                List<string> user_accesses = SRLCore.Model.UserSession<TUser>.GetAccesses(Db, user.id);
-
-                Dictionary<string, object> Session = new Dictionary<string, object>
-                {
-                    ["Id"] = user.id,
-                    ["Accesses"] = user_accesses,
-                    ["UserData"] = new List<TUser> { user }.Select(x => SRLCore.Model.UserSession<TUser>.SessionFields(x)).First()
-                };
-                response.Model = Session;
-                response.ErrorCode = (int)ErrorCode.OK;
-            }
-            catch (Exception ex)
-            {
-                LogHandler.LogError(Logger, response, method, ex);
-            }
-
-            return response.ToHttpResponse(Logger, Request.HttpContext);
+            return response.ToResponse(Session);
         }
+
+        
 
         [HttpGet("authenticate")]
         [DisplayName("احراز هویت")]

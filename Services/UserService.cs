@@ -64,7 +64,7 @@ namespace SRLCore.Services
 
         public bool Authorization(string action, long user_id, out List<string> user_accesses)
         {
-            user_accesses = UserSession<TUser>.GetAccesses(_context, user_id);
+            user_accesses = UserSession.GetAccesses(_context, user_id);
             bool is_allowed = user_accesses.Distinct().Contains(action);
             return is_allowed;
         }

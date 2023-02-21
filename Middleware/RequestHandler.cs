@@ -39,6 +39,7 @@ namespace SRLCore.Middleware
     {
         public virtual string[] no_auth_actions => new string[] { "" };
         public virtual string[] no_access_actions => new string[] { "" };
+        public virtual bool check_user_first_login => false;
         public abstract DotNetCoreVersion dotnet_core_version { get; }
 
         protected readonly RequestDelegate _next;
@@ -92,6 +93,9 @@ namespace SRLCore.Middleware
                             throw new GlobalException(ErrorCode.Unauthorized);
                         }
                         if (user == null) throw new GlobalException(ErrorCode.Unauthorized);
+
+                        if(check_user_first_login && (user.change_pass_next_login==null ? false : (bool)user.change_pass_next_login)) 
+                            throw new GlobalException(ErrorCode.PreconditionFailed,Constants.MessageText.PasswordMustBeChanged);
 
                         context.Session.SetString("Id", user.id.ToString());
                         context.Session.SetString("UserData", Newtonsoft.Json.JsonConvert.SerializeObject(user));

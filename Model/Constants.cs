@@ -34,6 +34,7 @@ namespace SRLCore
             public const string RoleUsersNotDefinedError = "کاربران مشخص نشده اند";
             public const string NoDataAccess = "دسترسی به اطلاعات وجود ندارد";
             public const string CoNationalCodeLenght = "شناسه ملی باید 11 رقمی باشد";
+            public const string PasswordMustBeChanged = "تغییر رمز عبور کاربر الزامی است";
             public static string RequiredFieldErrorMes(string field) =>  $"{RequiredFieldError}: {field}";
         } 
         public class Singleton
