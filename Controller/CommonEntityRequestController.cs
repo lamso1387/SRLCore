@@ -9,7 +9,7 @@ using SRLCore.Model;
 using SRLCore.Middleware;
 
 namespace SRLCore.Controllers
-{ 
+{
 
     public abstract class CommonEntityRequestController<Tcontext, TUser, TRole, TUserRole, TEntity, TRequest> :
          CommonController<Tcontext, TUser, TRole, TUserRole>
@@ -20,7 +20,7 @@ namespace SRLCore.Controllers
     {
 
 
-      
+
 
         public CommonEntityRequestController(IDistributedCache distributedCache,
         ILogger<CommonEntityRequestController<Tcontext, TUser, TRole, TUserRole, TEntity, TRequest>> logger, Tcontext dbContext,
@@ -42,7 +42,7 @@ namespace SRLCore.Controllers
                 entity.id = (long)edit_id;
             }
         }
-        protected abstract TEntity RequestToEntity(TRequest request);
+        protected virtual TEntity RequestToEntity(TRequest request) { throw new NotImplementedException(); }
 
         protected virtual TEntity CreateEntityFromRequest(TRequest request, RequestType type)
         {
