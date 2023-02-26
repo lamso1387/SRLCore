@@ -33,13 +33,14 @@ namespace SRLCore.Services
     public class KavenegarService :ISrlService
     {
         public string api_key { get; set; }
+        public string sender { get; set; }
 
         public KavenegarService(IHttpClientFactory clientFactory) : base(clientFactory)
         {
         }
 
 
-        public async Task<KavenegarListResponse<SendSmsResponse>> Send(List<string> mobiles, string sender, string message)
+        public async Task<KavenegarListResponse<SendSmsResponse>> Send(List<string> mobiles, string message)
         {  
             var input = $"?receptor={string.Join(",", mobiles)}&sender={sender}&message={message}";
 
