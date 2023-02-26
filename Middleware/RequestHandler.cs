@@ -30,6 +30,7 @@ using SRLCore.Services;
 using System.Text.Json;
 using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.AspNetCore.Razor.Language.CodeGeneration;
+using SRLCore.Model.Constants;
 
 namespace SRLCore.Middleware
 {
@@ -95,7 +96,7 @@ namespace SRLCore.Middleware
                         if (user == null) throw new GlobalException(ErrorCode.Unauthorized);
 
                         if(check_user_first_login && (user.change_pass_next_login==null ? false : (bool)user.change_pass_next_login)) 
-                            throw new GlobalException(ErrorCode.PreconditionFailed,Constants.MessageText.PasswordMustBeChanged);
+                            throw new GlobalException(ErrorCode.PreconditionFailed,MessageText.PasswordMustBeChanged);
 
                         context.Session.SetString("Id", user.id.ToString());
                         context.Session.SetString("UserData", Newtonsoft.Json.JsonConvert.SerializeObject(user));
@@ -210,7 +211,7 @@ namespace SRLCore.Middleware
 
     public class ErrorProp
     {
-        public string message { get; set; } = Constants.MessageText.ErrorNotSet;
+        public string message { get; set; } = MessageText.ErrorNotSet;
         //  public int code { get; set; } = -1;
         public HttpStatusCode status { get; set; } = HttpStatusCode.Unused;
 

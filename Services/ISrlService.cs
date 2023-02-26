@@ -9,7 +9,7 @@ namespace SRLCore.Services
 
     public class ISrlService 
     { 
-        private readonly IHttpClientFactory _clientFactory;
+        public readonly IHttpClientFactory _clientFactory;
         public ISrlService(IHttpClientFactory clientFactory)
         { 
             _clientFactory = clientFactory;
