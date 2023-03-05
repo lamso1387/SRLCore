@@ -136,11 +136,12 @@ namespace SRLCore.Model
             }
         }
 
-        public async Task AddSave<T>(T entity)
+        public async Task<int> AddSave<T>(T entity)
         {
             await AddAsync(entity);
             int save = await SaveChangesAsync();
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
+            return save;
 
         }
         public async Task<int> AddRangeSave<T>(List<T> entity_list) where T : class
