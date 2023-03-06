@@ -307,16 +307,18 @@ namespace SRLCore.Controllers
                 }
             }
 
-            var policies=SRL.Convertor.EnumToDictionary(policy_access_enum_type);
-            foreach (var item in policies)
-            { 
-                action_titles.Add(new Dictionary<string, string>()
+            if (policy_access_enum_type != null)
+            {
+                var policies = SRL.Convertor.EnumToDictionary(policy_access_enum_type);
+                foreach (var item in policies)
                 {
-                    ["name"] = item.Key,
-                    ["title"] = item.Value
-                }) ;
-            }         
-
+                    action_titles.Add(new Dictionary<string, string>()
+                    {
+                        ["name"] = item.Key,
+                        ["title"] = item.Value
+                    });
+                }
+            }
             return response.ToResponse(action_titles);
         }
 

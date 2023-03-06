@@ -19,19 +19,19 @@ namespace SRLCore.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public abstract class UserController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest> : CommonEntityRequestController<Tcontext, TUser, TRole, TUserRole,TUser,TAddUserRequest>
+    public abstract class UserController<Tcontext, TUser, TRole, TUserRole, TAddUserRequest> : CommonEntityRequestController<Tcontext, TUser, TRole, TUserRole, TUser, TAddUserRequest>
         where TUser : IUser where TRole : IRole where TUserRole : IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
-        where TAddUserRequest:AddUserRequest
+        where TAddUserRequest : AddUserRequest
     {
         protected abstract void EditUserFieldFromRequest(TUser existing_entity, TUser new_entity);
         protected virtual object UserSessionData(TUser user)
         {
-            return new List<TUser> { user }.Select(x =>   new { x.id, x.first_name, x.last_name, x.create_date, x.full_name, x.mobile }).First();
+            return new List<TUser> { user }.Select(x => new { x.id, x.first_name, x.last_name, x.create_date, x.full_name, x.mobile }).First();
         }
 
         public UserController(IDistributedCache distributedCache,
-            ILogger<UserController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest>> logger, Tcontext dbContext,
+            ILogger<UserController<Tcontext, TUser, TRole, TUserRole, TAddUserRequest>> logger, Tcontext dbContext,
             SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
              : base(distributedCache, logger, dbContext, userService)
         {
@@ -48,7 +48,7 @@ namespace SRLCore.Controllers
             if (user == null)
                 throw new Middleware.GlobalException(ErrorCode.Unauthorized);
 
-            List<string> user_accesses =UserSession.GetAccesses(Db, user.id);
+            List<string> user_accesses = UserSession.GetAccesses(Db, user.id);
 
 
             var user_data = UserSessionData(user);
@@ -63,7 +63,7 @@ namespace SRLCore.Controllers
             return response.ToResponse(Session);
         }
 
-        
+
 
         [HttpGet("authenticate")]
         [DisplayName("احراز هویت")]
@@ -232,6 +232,27 @@ namespace SRLCore.Controllers
             return response.ToHttpResponse(Logger, Request.HttpContext);
         }
 
+        [DisplayName("تغییر رمز توسط  کاربر")]
+        [HttpPut("ChangePassword")]
+        public async Task<IActionResult> ChangePasswordUser([FromBody] TAddUserRequest request)
+        {
+            SingleResponse<object> response = new SingleResponse<object>();
+              
+            var entity = RequestToEntity(request);
+            entity.id = user_session_id;
+
+            var existingEntity = await Db.GetUser(entity.id);
+            existingEntity.ThrowIfNotExist();
+
+            existingEntity.password = entity.password;
+              
+            existingEntity.UpdatePasswordHash();
+
+            int save = await Db.UpdateSave(); 
+
+            return response.ToResponse(entity,entity.Selector);
+        }
+
         [HttpGet("{id}")]
         [DisplayName("مشاهده کاربر")]
         public async Task<IActionResult> GetUser(long id)
@@ -246,9 +267,6 @@ namespace SRLCore.Controllers
 
             return response.ToResponse(existingEntity);
         }
-
-
-
 
     }
 }
