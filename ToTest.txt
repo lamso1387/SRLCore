@@ -1,3 +1,0 @@
-﻿    check creator_id and create_date get defaylt values
-    accessess
-    session
