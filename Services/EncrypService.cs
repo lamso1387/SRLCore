@@ -31,9 +31,8 @@ namespace SRLCore.Services
     public class EncrypService
     {
         public string encryptor { get; set; }
-        public string decryptor { get; set; }
-
         private readonly IDataProtectionProvider _provider;
+        private IDataProtector protector;
 
         public EncrypService(IDataProtectionProvider provider)
         {
@@ -42,20 +41,16 @@ namespace SRLCore.Services
         public void SetEncryptor(string key)
         {
             encryptor = key;
-        }
-        public void SetDecryptor(string key)
-        {
-            decryptor = key;
+            protector = _provider.CreateProtector(encryptor);
+
         }
         public string Encrypt(string plainText)
         {
-            var protector = _provider.CreateProtector(encryptor);
             return protector.Protect(plainText);
         }
 
         public string Decrypt(string cipherText)
-        {
-            var protector = _provider.CreateProtector(decryptor);
+        { 
             return protector.Unprotect(cipherText);
         }
     }
