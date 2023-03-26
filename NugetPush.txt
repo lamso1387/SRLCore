@@ -1,2 +1,2 @@
-﻿using developer command promtT,from folder existing .nupkg file:
+﻿using developer command prompt,from folder existing .nupkg file:
 dotnet nuget push [.nupkg file] --api-key [api_key] --source https://api.nuget.org/v3/index.json
