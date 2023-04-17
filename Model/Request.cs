@@ -11,8 +11,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using Newtonsoft.Json; 
 using System.ComponentModel.DataAnnotations.Schema;
-using System.IO; 
-
+using System.IO;
+using static SRLCore.Model.ValidationAttr;
 
 namespace SRLCore.Model
 {
@@ -173,10 +173,10 @@ namespace SRLCore.Model
         [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("نام خانوادگی")]
         public string last_name { get; set; }
         [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("موبایل")]
-        [SRL.Mobile(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
+        [Mobile(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
         public string mobile { get; set; }
         [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("کدملی")]
-        [SRL.NationalCode(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
+        [NationalCode(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic)]
         public string national_code { get; set; }
         public string password { get; set; }
         protected override bool CheckPropertyValidation()
