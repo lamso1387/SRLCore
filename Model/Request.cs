@@ -143,11 +143,7 @@ namespace SRLCore.Model
     }
 
 
-    public class DateRangeAttribute : RangeAttribute
-    {
-        public DateRangeAttribute()
-           : base(typeof(DateTime), DateTime.Now.AddYears(-20).ToShortDateString(), DateTime.Now.AddYears(20).ToShortDateString()) { }
-    }
+    
    
     public class PagedRequest
     {
