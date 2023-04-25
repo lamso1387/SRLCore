@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 
 namespace SRLCore.Model
 {
-   public  class ValidationAttr
+    public class ValidationAttr
     {
         public class MobileAttribute : ValidationAttribute
         {
@@ -46,10 +46,11 @@ namespace SRLCore.Model
                 string value_ = value.ToString();
                 if (string.IsNullOrWhiteSpace(value_)) return false;
                 if (value_.Length != 26) return false;
-                if (value_.Substring(0, 0) != "IR") return false;
+                if (value_.Substring(0, 2) != "IR") return false;
                 string shaba = value_.Substring(2, 24);
-                long m;
-                if (!long.TryParse(shaba, out m)) return false;
+                var regex = new Regex(@"^\d+$");
+                if (!regex.IsMatch(shaba))
+                    return false;
                 return true;
             }
         }
@@ -204,7 +205,7 @@ namespace SRLCore.Model
             }
         }
         public class NumberNullable : ValidationAttribute
-        { 
+        {
             public override bool IsValid(object value)
             {
                 if (value == null) return true;
