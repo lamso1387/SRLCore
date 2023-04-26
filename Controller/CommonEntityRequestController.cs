@@ -64,7 +64,7 @@ namespace SRLCore.Controllers
 
         protected virtual void ThrowEmptyRequest(TRequest request)
         {
-            if (request == null) throw new GlobalException(ErrorCode.BadRequest);
+            if (request == null) throw new GlobalException(ErrorCode.InvalidRequest);
         }
 
     }

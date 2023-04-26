@@ -42,7 +42,7 @@ namespace SRLCore.Model
         UnexpectedError = HttpStatusCode.ExpectationFailed,
         [Description(@"{""message"":""اطلاعات ذخیره نشد مجددا تلاش کنید یا با پشتیبان تماس بگیرید"" ,""status"": ""ExpectationFailed""}")]
         DbSaveNotDone = 3,
-        [Description(@"{""message"":""خطا در ذخیره سازی اطلاعات"" ,""status"": ""UnprocessableEntity""}")]
+        [Description(@"{""message"":""خطا در ذخیره سازی اطلاعات رخ داد  با پشتیبان تماس بگیرید"" ,""status"": ""UnprocessableEntity""}")]
         DbUpdateException = 4,
         [Description(@"{""message"":""اطلاعات تکراری است"" ,""status"": ""Conflict""}")]
         AddRepeatedEntity = 5,
@@ -63,7 +63,11 @@ namespace SRLCore.Model
         [Description(@"{""message"":""شرایط لازم برای انجام این عملیات رعایت نشده است"" ,""status"": ""PreconditionFailed""}")]
         PreconditionFailed = HttpStatusCode.PreconditionFailed,
         [Description(@"{""message"":""مغایرت در انجام عملیات"" ,""status"": ""Conflict""}")]
-        Conflict = HttpStatusCode.Conflict
+        Conflict = HttpStatusCode.Conflict,
+        [Description(@"{""message"":""خطا در انجام عملیات رخ داده است با پشتیبان تماس بگیرید"" ,""status"": ""UnprocessableEntity""}")]
+        InvalidOperationException = HttpStatusCode.UnprocessableEntity,
+        [Description(@"{""message"":""ورودی بدرستی تنظیم نشده است"" ,""status"": ""Gone""}")]
+        InvalidRequest = HttpStatusCode.Gone
     }
     public enum NonActionAccess
     {

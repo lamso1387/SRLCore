@@ -60,7 +60,7 @@ namespace SRLCore.Middleware
                 string action = null;
                 try
                 {
-                    bool need_auth  = context.NeedAuth(no_auth_actions, ref action); 
+                    bool need_auth = context.NeedAuth(no_auth_actions, ref action);
                     context.Request.EnableBuffering();
                     using (var reader = new StreamReader(
                         context.Request.Body,
@@ -94,8 +94,8 @@ namespace SRLCore.Middleware
                         }
                         if (user == null) throw new GlobalException(ErrorCode.Unauthorized);
 
-                        if(check_user_first_login && (user.change_pass_next_login==null ? false : (bool)user.change_pass_next_login)) 
-                            throw new GlobalException(ErrorCode.PreconditionFailed,MessageText.PasswordMustBeChanged);
+                        if (check_user_first_login && (user.change_pass_next_login == null ? false : (bool)user.change_pass_next_login))
+                            throw new GlobalException(ErrorCode.PreconditionFailed, MessageText.PasswordMustBeChanged);
 
                         context.Session.SetString("Id", user.id.ToString());
                         context.Session.SetString("UserData", Newtonsoft.Json.JsonConvert.SerializeObject(user));
@@ -129,10 +129,10 @@ namespace SRLCore.Middleware
                 try
                 {
                     memStream.Position = 0;
-                    string responseBody = new StreamReader(memStream,encoding: Encoding.UTF8, detectEncodingFromByteOrderMarks: false).ReadToEnd();
+                    string responseBody = new StreamReader(memStream, encoding: Encoding.UTF8, detectEncodingFromByteOrderMarks: false).ReadToEnd();
                     memStream.Position = 0;
-                    await memStream.CopyToAsync(response_body); 
-                    context.Response.Body = response_body; 
+                    await memStream.CopyToAsync(response_body);
+                    context.Response.Body = response_body;
                 }
                 catch (Exception error)
                 {
@@ -167,29 +167,32 @@ namespace SRLCore.Middleware
                 mes_res.ErrorDetail = error.InnerException?.Message;
                 mes_res.ErrorCode = (int)ErrorCode.UnexpectedError;
                 context.Response.StatusCode = (int)ErrorCode.UnexpectedError;
-                ErrorCode error_code;
-                ErrorProp error_prop;
+                ErrorCode error_code=ErrorCode.UnexpectedError;
+                ErrorProp error_prop=new ErrorProp();
                 switch (error.GetType().Name)
                 {
                     case nameof(GlobalException):
                         error_code = EnumConvert.StringToEnum<ErrorCode>(error.Message);
                         error_prop = ErrorProp.GetError(error_code);
-
-                        context.Response.StatusCode = (int)error_prop.status;
                         mes_res.ErrorMessage = error_prop.message;
-                        mes_res.ErrorCode = (int)error_code;
                         if (!string.IsNullOrWhiteSpace(mes_res.ErrorDetail)) mes_res.ErrorMessage = mes_res.ErrorDetail;
                         break;
                     case nameof(InvalidOperationException):
-                        error_code = ErrorCode.BadRequest;
+                        error_code = ErrorCode.InvalidOperationException;
                         error_prop = ErrorProp.GetError(error_code);
-                        context.Response.StatusCode = (int)error_prop.status;
+                        mes_res.ErrorDetail = $"{mes_res.ErrorMessage}. {mes_res.ErrorDetail}";
                         mes_res.ErrorMessage = error_prop.message;
-                        mes_res.ErrorCode = (int)error_code;
-                        if (!string.IsNullOrWhiteSpace(mes_res.ErrorDetail)) mes_res.ErrorMessage = mes_res.ErrorDetail;
-                        else mes_res.ErrorDetail = error.Message;
+                        break;
+                    case nameof(DbUpdateException):
+                        error_code = ErrorCode.DbUpdateException;
+                        error_prop = ErrorProp.GetError(error_code);
+                        mes_res.ErrorMessage = error_prop.message;
                         break;
                 }
+
+                
+                context.Response.StatusCode = (int)error_prop.status;               
+                mes_res.ErrorCode = (int)error_code; 
                 context.Response.ContentType = "application/json";
                 output = JsonSerializer.Serialize(mes_res);
             }
