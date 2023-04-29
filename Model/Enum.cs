@@ -67,7 +67,9 @@ namespace SRLCore.Model
         [Description(@"{""message"":""خطا در انجام عملیات رخ داده است با پشتیبان تماس بگیرید"" ,""status"": ""UnprocessableEntity""}")]
         InvalidOperationException = HttpStatusCode.UnprocessableEntity,
         [Description(@"{""message"":""ورودی بدرستی تنظیم نشده است"" ,""status"": ""Gone""}")]
-        InvalidRequest = HttpStatusCode.Gone
+        InvalidRequest = HttpStatusCode.Gone,
+        [Description(@"{""message"":""اطلاعات ثبت شد ولی خطایی در ادامه عملیات رخ داد"" ,""status"": ""Created""}")]
+        Created = HttpStatusCode.Created
     }
     public enum NonActionAccess
     {
