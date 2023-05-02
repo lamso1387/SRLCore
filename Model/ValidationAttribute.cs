@@ -152,7 +152,7 @@ namespace SRLCore.Model
             {
                 if (value == null) return false;
                 if (value.ToString().Length != 8) return false;
-                Regex r = new Regex(@"^(((0[0-9])|(1[0-9])|(2[1-3])):([0-5][0-9]):[0-5][0-9])");
+                Regex r = new Regex(@"^(((0[0-9])|(1[0-9])|(2[0-3])):([0-5][0-9]):[0-5][0-9])");
 
                 if (r.Match(value.ToString()).Success) return true;
                 else return false;

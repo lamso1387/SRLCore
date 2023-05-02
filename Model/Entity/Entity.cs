@@ -341,6 +341,9 @@ namespace SRLCore.Model
         public static void ThrowIfNotExist(this CommonProperty existingEntity)
         { if (existingEntity == null) throw new GlobalException(SRLCore.Model.ErrorCode.ItemNotExists); }
 
+        public static void ThrowConflictIfExist(this CommonProperty existingEntity, string message=null)
+        { if (existingEntity != null) throw new GlobalException(SRLCore.Model.ErrorCode.AddRepeatedEntity, message); }
+
 
 
     }
