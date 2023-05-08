@@ -29,25 +29,15 @@ namespace SRLCore.Controllers
         {
         }
 
-        protected virtual void SetAddEditProperty(TEntity entity, RequestType type, long? edit_id)
-        {
-            if (type == RequestType.add)
-            {
-                entity.creator_id = user_session_id;
-            }
-            else if (type == RequestType.edit)
-            {
-                entity.modifier_id = user_session_id;
-                entity.modify_date = DateTime.Now;
-                entity.id = (long)edit_id;
-            }
-        }
         protected virtual TEntity RequestToEntity(TRequest request) { throw new NotImplementedException(); }
 
         protected virtual TEntity CreateEntityFromRequest(TRequest request, RequestType type)
         {
             TEntity entity = RequestToEntity(request);
-            SetAddEditProperty(entity, type, request.id);
+            if (type == RequestType.add)
+                entity.creator_id = user_session_id;
+            else if (type == RequestType.edit)
+                entity.modifier_id = user_session_id;
             return entity;
         }
         protected async virtual Task<TEntity> AddEntity(TRequest request, Tcontext db)

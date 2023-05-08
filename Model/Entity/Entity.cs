@@ -256,12 +256,19 @@ namespace SRLCore.Model
             x.modifier_id,
             x.modify_date
         };
-
         [NotMapped]
         public virtual EntityStatus status_enum
         {
             get => SRL.Convertor.StringToEnum<EntityStatus>(status);
             set { status = value.ToString(); }
+        }
+        [NotMapped]
+        public virtual DateTime? update_date => modify_date == null ? create_date : modify_date;
+
+        public void Modify(CommonProperty new_entity)
+        {
+            modifier_id = new_entity.modifier_id;
+            modify_date= DateTime.Now;
         }
 
     }

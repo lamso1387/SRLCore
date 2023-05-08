@@ -14,14 +14,15 @@ namespace SRLCore.Services
         { 
             _clientFactory = clientFactory;
         }
-        public HttpClient CreateClient(string type)
+        public virtual HttpClient CreateClient(string type)
         {
             var client = _clientFactory.CreateClient(type); 
             return client;
         }
-        public void ThrowError()
+
+        public void ThrowError(string message=null)
         {
-            throw new GlobalException(ErrorCode.FailedDependency);
+            throw new GlobalException(ErrorCode.FailedDependency, message);
         }
 
 
