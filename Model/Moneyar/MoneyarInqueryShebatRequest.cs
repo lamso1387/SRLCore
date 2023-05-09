@@ -9,7 +9,7 @@ namespace SRLCore.Model.Moneyar
     public class MoneyarInqueryShebatRequest : SRLCore.Model.WebRequest
     {
         [Shaba(ErrorMessage = Constants.MessageText.FieldFormatErrorDynamic), DisplayName("شبا راننده اول")]
-        public virtual string sheba { get; set; }
+        public virtual string shaba { get; set; }
 
 
     }
