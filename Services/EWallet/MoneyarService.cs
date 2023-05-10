@@ -120,7 +120,7 @@ namespace SRLCore.Services.EWallet
             return rez;
         }
 
-        public async Task<MoneyarResponse<MoneyarShebaResponse>> GetSheba(string sheba)
+        public async Task<MoneyarResponse<MoneyarShebaResponse>> GetShaba(string sheba)
         {
             Dictionary<string, string> inp = new Dictionary<string, string> { ["iban"] = sheba.ToUpper() };
 
@@ -134,7 +134,7 @@ namespace SRLCore.Services.EWallet
         }
         public async Task<MoneyarShebaResponse> InqueryShaba(string shaba)
         {
-            var result = await GetSheba(shaba);
+            var result = await GetShaba(shaba);
             if (!result.IsOk && result.code == 2)
                 throw new GlobalException(SRLCore.Model.ErrorCode.BadRequest, Model.Constants.MessageText.wrong_shaba);
             else if (!result.IsOk)
