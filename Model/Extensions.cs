@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Mvc;
 using System.Net;
 using Microsoft.Extensions.Logging;
+using SRLCore.Middleware;
 
 namespace SRLCore.Model
 {
@@ -23,9 +24,10 @@ namespace SRLCore.Model
     public static class HttpContextExtentions
     {
         public static string GetActionName(this HttpContext context)
-        {
-            
-            return context.GetRouteData().Values["action"].ToString();
+        { 
+            var action= context.GetRouteData()?.Values["action"]?.ToString();
+            if (action == null) throw new GlobalException(ErrorCode.NotFound);
+            return action;
         }
         public static bool NeedAuth(this HttpContext context,string[] no_auth_actions, ref string action)
         {

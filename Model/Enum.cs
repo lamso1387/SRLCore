@@ -69,7 +69,9 @@ namespace SRLCore.Model
         [Description(@"{""message"":""ورودی بدرستی تنظیم نشده است"" ,""status"": ""Gone""}")]
         InvalidRequest = HttpStatusCode.Gone,
         [Description(@"{""message"":""اطلاعات ثبت شد ولی خطایی در ادامه عملیات رخ داد"" ,""status"": ""Created""}")]
-        Created = HttpStatusCode.Created
+        Created = HttpStatusCode.Created,
+        [Description(@"{""message"":""آدرس درخواستی اشتباه است"" ,""status"": ""NotFound""}")]
+        NotFound = HttpStatusCode.NotFound
     }
     public enum NonActionAccess
     {
