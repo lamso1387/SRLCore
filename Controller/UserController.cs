@@ -248,7 +248,7 @@ namespace SRLCore.Controllers
               
             existingEntity.UpdatePasswordHash();
 
-            int save = await Db.UpdateSave(); 
+            int save = await Db.UpdateSave(existingEntity, user_session_id); 
 
             return response.ToResponse(entity,entity.Selector);
         }

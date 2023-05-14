@@ -161,11 +161,11 @@ namespace SRLCore.Model
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public async Task<int> UpdateSave(bool throw_if_not_saved = true)
+        public async Task<int> UpdateSave(CommonProperty entity,long modifier_user_id)
         {
-            int save = await SaveChangesAsync();
-            if (save == 0 && throw_if_not_saved) throw new GlobalException(ErrorCode.DbSaveNotDone);
-            else return save;
+            entity.Modify(modifier_user_id);
+            int save = await SaveChangesAsync(); 
+            return save;
 
         }
         public async Task Save()
@@ -265,11 +265,11 @@ namespace SRLCore.Model
         [NotMapped]
         public virtual DateTime? update_date => modify_date == null ? create_date : modify_date;
 
-        public void Modify(CommonProperty new_entity)
+        public void Modify(long modifier_user_id)
         {
-            modifier_id = new_entity.modifier_id;
+            modifier_id = modifier_user_id;
             modify_date= DateTime.Now;
-        }
+        } 
 
     }
 

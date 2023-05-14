@@ -1,2 +1,5 @@
-﻿using developer command prompt,from folder existing .nupkg file:
+﻿upgrade version in properties:packing
+build to release folder
+pack project
+using developer command prompt,from folder existing .nupkg file:
 dotnet nuget push [.nupkg file] --api-key [api_key] --source https://api.nuget.org/v3/index.json
