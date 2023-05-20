@@ -65,7 +65,7 @@ namespace SRLCore.Model
                 if (value_.Substring(0, 2) != "IR") return false;
                 string shaba = value_.Substring(2, 24);
 
-                if (!SRL.Security.IsNumber(shaba)) return false;
+                if (!Tools.IdentifierTools.IsNumber(shaba)) return false;
                 return true;
             }
         }

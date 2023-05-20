@@ -12,7 +12,6 @@ using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Routing;
 using System.ComponentModel;
-using SRL;
 using SRLCore.Model;
 using System.Reflection;
 using SRLCore.Middleware;
@@ -40,7 +39,7 @@ namespace SRLCore.Controllers
         protected virtual List<TUser> LoadUserRoles(TRole existingEntity)
         {
             Db.Entry(existingEntity).Collection<TUserRole>(user_roles_col_name).Query().Include(user_col_name).Load();
-            var users = ((ICollection<TUserRole>)SRL.ClassManagement.GetProperty(user_roles_col_name, existingEntity)).AsQueryable().Select(user_col_name).ToDynamicList<TUser>();
+            var users = ((ICollection<TUserRole>)Tools.TypeTools.GetProperty(user_roles_col_name, existingEntity)).AsQueryable().Select(user_col_name).ToDynamicList<TUser>();
             return users;
         }
 
@@ -202,7 +201,7 @@ namespace SRLCore.Controllers
             {
                 RoleConstraint constraint = new RoleConstraint();
                 constraint.column_name = constraint_col_name;
-                var const_ = (string)SRL.ClassManagement.GetProperty(constraint_col_name, existingEntity);
+                var const_ = (string)Tools.TypeTools.GetProperty(constraint_col_name, existingEntity);
                 if(!string.IsNullOrWhiteSpace(const_))
                 {
                     constraint.constraints = const_.Split(",").ToList();
@@ -285,7 +284,7 @@ namespace SRLCore.Controllers
         {
             SingleResponse<object> response = new SingleResponse<object>();
 
-            List<Type> all_controller_types = SRL.ChildParent
+            List<Type> all_controller_types =Tools.TypeTools
                 .GetAllChildrenClasses<CommonController<Tcontext, TUser, TRole, TUserRole>>(CurrentAssembly);
 
             all_controller_types.Add(typeof(UserController<Tcontext, TUser, TRole, TUserRole,TAddUserRequest>));
@@ -295,13 +294,13 @@ namespace SRLCore.Controllers
             foreach (var controller_type in all_controller_types)
             {
 
-                MethodInfo[] actions = SRL.ActionManagement.Method.GetPublicMethods(controller_type);
+                MethodInfo[] actions = Tools.MethodTools.GetPublicMethods(controller_type);
                 if (actions.Any())
                 {
                     var titles = actions.Select(x => new Dictionary<string,string> ()
                     {
                         ["name"] = x.Name,
-                        ["title"] = SRL.ActionManagement.Method.GetDisplayName(x)
+                        ["title"] =Tools.MethodTools.GetDisplayName(x)
                     });
                     action_titles.AddRange(titles);
                 }
@@ -309,7 +308,7 @@ namespace SRLCore.Controllers
 
             if (policy_access_enum_type != null)
             {
-                var policies = SRL.Convertor.EnumToDictionary(policy_access_enum_type);
+                var policies = Tools.ConvertorTools.EnumToDictionary(policy_access_enum_type);
                 foreach (var item in policies)
                 {
                     action_titles.Add(new Dictionary<string, string>()

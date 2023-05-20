@@ -44,7 +44,7 @@ namespace SRLCore.Model.Moneyar
             public long transferAmount { get; set; }
             public int sequence { get; set; }
 
-            public string pdate => SRL.Convertor.EnglishToPersianDate(date);
+            public string pdate => Tools.ConvertorTools.EnglishToPersianDate(date);
             [Required]
             public string bag_uid { get; set; }
             public DepositDetailState apply_state { get; set; }

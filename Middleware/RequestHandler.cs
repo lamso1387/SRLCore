@@ -223,7 +223,7 @@ namespace SRLCore.Middleware
 
         public static ErrorProp GetError(ErrorCode key, string message = null)
         {
-            string enum_des_str = SRL.ClassManagement.GetEnumDescription(key);
+            string enum_des_str = Tools.EnumTools.GetEnumDescription(key);
             ErrorProp enum_des = Newtonsoft.Json.JsonConvert.DeserializeObject<ErrorProp>(enum_des_str);
             if (message != null) enum_des.message = message;
             return enum_des;

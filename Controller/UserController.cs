@@ -11,8 +11,7 @@ using System.Threading;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Routing;
-using System.ComponentModel;
-using SRL;
+using System.ComponentModel; 
 using SRLCore.Model;
 
 namespace SRLCore.Controllers

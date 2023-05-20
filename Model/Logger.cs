@@ -41,7 +41,7 @@ namespace SRLCore.Model
         public static void LogError(ILogger Logger, IResponse response, string method, Exception ex)
         {
             response.ErrorCode = (int)ErrorCode.UnexpectedError;
-            response.ErrorDetail = SRL.ActionManagement.Exceptions.CreateExactErrorMessage(ex);
+            response.ErrorDetail = Tools.ExceptionsTools.CreateExactErrorMessage(ex);
             switch (ex.GetType().Name)
             {
                 case nameof(DbUpdateException):

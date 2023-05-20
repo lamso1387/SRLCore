@@ -15,8 +15,8 @@ namespace SRLCore.Model.Moneyar
         [Required(ErrorMessage = Constants.MessageText.RequiredFieldErrorDynamic), DisplayName("کیف پول")]
         public string accountuid { get; set; }
 
-        public DateTime startdate => SRL.Convertor.PersianDateStringToEnglishDate(pstartdate, SRL.Convertor.DateFromTo.from);
-        public DateTime enddate => SRL.Convertor.PersianDateStringToEnglishDate(penddate, SRL.Convertor.DateFromTo.to);
+        public DateTime startdate =>Tools.ConvertorTools.PersianDateStringToEnglishDate(pstartdate, Tools.ConvertorTools.DateFromTo.from);
+        public DateTime enddate => Tools.ConvertorTools.PersianDateStringToEnglishDate(penddate, Tools.ConvertorTools.DateFromTo.to);
 
     }
 }

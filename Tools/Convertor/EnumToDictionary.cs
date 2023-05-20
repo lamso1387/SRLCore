@@ -5,18 +5,16 @@ namespace SRLCore.Tools
 {
     public partial class ConvertorTools
     {
-        public static Dictionary<int, string> EnumDescriptionNumberToDic(Type enum_type)
+        public static Dictionary<string, string> EnumToDictionary(Type enum_type)
         {
-            Dictionary<int, string> dic = new Dictionary<int, string>();
+            Dictionary<string, string> dic = new Dictionary<string, string>();
             foreach (var val in Enum.GetValues(enum_type))
             {
                 string enum_des_str = Tools.EnumTools.GetEnumDescription(val);
-                dic.Add((int)val, enum_des_str);
+                dic.Add(val.ToString(), enum_des_str);
             }
             return dic;
 
         }
-
-       
     }
 }

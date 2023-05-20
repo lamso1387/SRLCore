@@ -89,7 +89,7 @@ namespace SRLCore.Model
         {
             var optionsBuilder = new DbContextOptionsBuilder<TDb>();
             optionsBuilder.UseSqlServer(GetConnectionString());
-            return SRL.ClassManagement.CreateInstance<TDb>(optionsBuilder.Options);
+            return Tools.TypeTools.CreateInstance<TDb>(optionsBuilder.Options);
         }
 
         public abstract void ModelCreator(ModelBuilder modelBuilder);
@@ -161,9 +161,9 @@ namespace SRLCore.Model
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public async Task<int> UpdateSave(CommonProperty entity,long modifier_user_id)
+        public async Task<int> UpdateSave(CommonProperty entity=null,long? modifier_user_id=null)
         {
-            entity.Modify(modifier_user_id);
+            if(entity!=null) entity.Modify((long)modifier_user_id);
             int save = await SaveChangesAsync(); 
             return save;
 
@@ -259,7 +259,7 @@ namespace SRLCore.Model
         [NotMapped]
         public virtual EntityStatus status_enum
         {
-            get => SRL.Convertor.StringToEnum<EntityStatus>(status);
+            get => Tools.ConvertorTools.StringToEnum<EntityStatus>(status);
             set { status = value.ToString(); }
         }
         [NotMapped]

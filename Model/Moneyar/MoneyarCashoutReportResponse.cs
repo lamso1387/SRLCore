@@ -20,7 +20,7 @@ namespace SRLCore.Model.Moneyar
             public string description { get; set; }
             public DateTime? bankdatetime { get; set; }
 
-            public string bankdatetime_persian => bankdatetime == null ? null : bankdatetime == DateTime.MinValue ? null : SRL.Convertor.EnglishToPersianDateTimeString((DateTime)bankdatetime);
+            public string bankdatetime_persian => bankdatetime == null ? null : bankdatetime == DateTime.MinValue ? null : Tools.ConvertorTools.EnglishToPersianDateTimeString((DateTime)bankdatetime);
             public string tr_referencenumber => $"tr:{referencenumber}";
         }
 

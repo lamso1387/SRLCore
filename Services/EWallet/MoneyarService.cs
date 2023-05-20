@@ -31,7 +31,7 @@ namespace SRLCore.Services.EWallet
             query[nameof(MoneyarCompletedCashoutReportRequest.Enddate)] = end_date.ToString(format);
             query[nameof(MoneyarCompletedCashoutReportRequest.Iban)] = iban;
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.CompleteCashoutReport, SRL.Json.CreateJsonBody(query));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.CompleteCashoutReport, Tools.JsonTools.CreateJsonBody(query));
 
             var result = await HandleResponse<MoneyarCashoutReportResponse>(response);
 
@@ -51,7 +51,7 @@ namespace SRLCore.Services.EWallet
             transferAccount.DestUser = new MoneyarTransferRequest.Destuser() { uid = dscUserDigitalBagId };
 
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.transfer, SRL.Json.CreateJsonBody(transferAccount));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.transfer, Tools.JsonTools.CreateJsonBody(transferAccount));
 
             if (!response.IsSuccessStatusCode) return new MoneyarResponse<MoneyarTransferResponse> { code = (int)response.StatusCode };
 
@@ -67,7 +67,7 @@ namespace SRLCore.Services.EWallet
 
 
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.balance, SRL.Json.CreateJsonBody(body));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.balance, Tools.JsonTools.CreateJsonBody(body));
 
             if (!response.IsSuccessStatusCode) return new MoneyarBalanceResponse { code = (int)response.StatusCode };
 
@@ -80,7 +80,7 @@ namespace SRLCore.Services.EWallet
         {
 
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.cashout, SRL.Json.CreateJsonBody(request));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.cashout, Tools.JsonTools.CreateJsonBody(request));
             var result = await response.Content.ReadAsAsync<MoneyarResponse<MoneyarCashoutResponse>>();
 
             if (!response.IsSuccessStatusCode) return new MoneyarResponse<MoneyarCashoutResponse> { code = (int)response.StatusCode, message = result.message };
@@ -91,7 +91,7 @@ namespace SRLCore.Services.EWallet
         public async Task<MoneyarResponse<MoneyarTransactionDetailsReportResponse<TransEnumType>>> TransactionDetailsReport<TransEnumType>(MoneyarTransactionDetailsReportRequest request)
         {
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.TransactionDetailsReport, SRL.Json.CreateJsonBody(request));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.TransactionDetailsReport, Tools.JsonTools.CreateJsonBody(request));
 
             var result = await HandleResponse<MoneyarTransactionDetailsReportResponse<TransEnumType>>(response);
 
@@ -100,7 +100,7 @@ namespace SRLCore.Services.EWallet
         public async Task<MoneyarResponse<MoneyarCashoutReportResponse>> ReservedCashoutReport()
         {
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.ReservedCashoutReport, SRL.Json.CreateJsonBody(new Dictionary<string, object> { ["startdate"] = "2021-01-08", ["enddate"] = "2030-03-12" }));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.ReservedCashoutReport, Tools.JsonTools.CreateJsonBody(new Dictionary<string, object> { ["startdate"] = "2021-01-08", ["enddate"] = "2030-03-12" }));
 
 
             var result = await HandleResponse<MoneyarCashoutReportResponse>(response);
@@ -125,7 +125,7 @@ namespace SRLCore.Services.EWallet
             Dictionary<string, string> inp = new Dictionary<string, string> { ["iban"] = sheba.ToUpper() };
 
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.getiban, SRL.Json.CreateJsonBody(inp));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.getiban, Tools.JsonTools.CreateJsonBody(inp));
 
 
             var result = await HandleResponse<MoneyarShebaResponse>(response);
@@ -145,7 +145,7 @@ namespace SRLCore.Services.EWallet
         {
 
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.DepositReport, SRL.Json.CreateJsonBody(request));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.DepositReport, Tools.JsonTools.CreateJsonBody(request));
 
 
             var result = await HandleResponse<MoneyarDepositReportResponse>(response);
@@ -156,7 +156,7 @@ namespace SRLCore.Services.EWallet
         {
 
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.Deposit, SRL.Json.CreateJsonBody(request));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.Deposit, Tools.JsonTools.CreateJsonBody(request));
 
 
             var result = await HandleResponse<object>(response);
@@ -169,7 +169,7 @@ namespace SRLCore.Services.EWallet
             Dictionary<string, string[]> inp = new Dictionary<string, string[]> { ["transactionuid"] = uid };
 
 
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.cashouttransactionreport, SRL.Json.CreateJsonBody(inp));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.cashouttransactionreport, Tools.JsonTools.CreateJsonBody(inp));
 
 
             var result = await HandleResponse<CashoutTransactionReportResponse>(response);
@@ -179,7 +179,7 @@ namespace SRLCore.Services.EWallet
         public async Task<MoneyarResponse<MoneyarReverseResponse>> Reverse(string uid)
         {
             Dictionary<string, string> inp = new Dictionary<string, string> { ["uid"] = uid };
-            var response = await client.PostAsync(Model.Constants.MoneyarUrl.reverse, SRL.Json.CreateJsonBody(inp));
+            var response = await client.PostAsync(Model.Constants.MoneyarUrl.reverse, Tools.JsonTools.CreateJsonBody(inp));
             var result = await HandleResponse<MoneyarReverseResponse>(response);
             return result;
         }

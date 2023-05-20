@@ -14,6 +14,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.IO;
 using static SRLCore.Model.ValidationAttr;
 
+
 namespace SRLCore.Model
 {
    
@@ -35,7 +36,7 @@ namespace SRLCore.Model
         }
         public bool CheckAttrbuteValidation()
         {
-            validation_errors = SRL.ClassManagement.CheckValidationAttribute(this);
+            validation_errors = Tools.TypeTools.CheckValidationAttribute(this);
             return validation_errors.Count == 0 ? true : false;
         }
         protected List<string> validation_errors { get; set; }

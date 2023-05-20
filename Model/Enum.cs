@@ -105,7 +105,7 @@ namespace SRLCore.Model
     {
         public static T StringToEnum<T>(string str)
         {
-            return SRL.Convertor.StringToEnum<T>(str);
+            return Tools.ConvertorTools.StringToEnum<T>(str);
         }
 
     }

@@ -34,7 +34,7 @@ namespace SRLCore.Model.Moneyar
                         string transaction_type = spl[0];
                         string transaction_trans = "شماره پیگیری";
 
-                        var list = SRL.Convertor.EnumToDictionary(typeof(TransEnumType));
+                        var list = Tools.ConvertorTools.EnumToDictionary(typeof(TransEnumType));
 
                         if (list.Where(x => x.Key == transaction_type).Any())
 
