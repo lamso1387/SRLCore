@@ -11,5 +11,7 @@ namespace SRLCore.Tools
             DescriptionAttribute[] attributes = (DescriptionAttribute[])enum_value.GetType().GetField(enum_value.ToString()).GetCustomAttributes(typeof(DescriptionAttribute), false);
             return attributes.Length > 0 ? attributes[0].Description : string.Empty;
         }
+        public static Array GetEnumValues<Tenum>()=> Enum.GetValues(typeof(Tenum));
+        public static string[] GetEnumNames<Tenum>() => Enum.GetNames(typeof(Tenum));
     }
 }

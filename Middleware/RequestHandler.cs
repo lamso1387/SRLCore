@@ -175,7 +175,7 @@ namespace SRLCore.Middleware
                         error_code = EnumConvert.StringToEnum<ErrorCode>(error.Message);
                         error_prop = ErrorProp.GetError(error_code);
                         mes_res.ErrorMessage = error_prop.message;
-                        if (!string.IsNullOrWhiteSpace(mes_res.ErrorDetail)) mes_res.ErrorMessage = mes_res.ErrorDetail;
+                        if (!string.IsNullOrWhiteSpace(mes_res.ErrorDetail)) mes_res.ErrorMessage = mes_res.ErrorMessage+". "+ mes_res.ErrorDetail;
                         break;
                     case nameof(InvalidOperationException):
                         error_code = ErrorCode.InvalidOperationException;
