@@ -71,7 +71,9 @@ namespace SRLCore.Model
         [Description(@"{""message"":""اطلاعات ثبت شد ولی خطایی در ادامه عملیات رخ داد"" ,""status"": ""Created""}")]
         Created = HttpStatusCode.Created,
         [Description(@"{""message"":""آدرس درخواستی اشتباه است"" ,""status"": ""NotFound""}")]
-        NotFound = HttpStatusCode.NotFound
+        NotFound = HttpStatusCode.NotFound,
+        [Description(@"{""message"":""انجام این عملیات غیر مجاز است"" ,""status"": ""MethodNotAllowed""}")]
+        MethodNotAllowed = HttpStatusCode.MethodNotAllowed
     }
     public enum NonActionAccess
     {
