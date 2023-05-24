@@ -19,7 +19,7 @@ using System.Reflection;
 namespace SRLCore.Model
 {
     public abstract class DbEntity<TDb> : DbContext, IDbContext where TDb : DbContext
-    { 
+    {
         public DbEntity(DbContextOptions<TDb> options)
          : base(options)
         {
@@ -106,7 +106,7 @@ namespace SRLCore.Model
             base.OnConfiguring(optionsBuilder);
         }
 
-        
+
         /// <summary>
         /// (builder.Property(e => e.mobile), 11)
         /// </summary>
@@ -114,7 +114,12 @@ namespace SRLCore.Model
         /// <summary>
         /// (builder.HasIndex(p => p.username))
         /// </summary>
-        public void ColumnUnique(IndexBuilder ib) => ib.IsUnique();
+        public void ColumnUnique(IndexBuilder ib, string filter = null)
+        {//e.g. filter= "[IsPrimary] = 1" 
+            if (string.IsNullOrWhiteSpace(filter))
+                ib.IsUnique();
+            else ib.IsUnique().HasFilter(filter);
+        }
 
 
         public string GetTableName<T>() where T : class
@@ -161,10 +166,10 @@ namespace SRLCore.Model
             if (save == 0) throw new GlobalException(ErrorCode.DbSaveNotDone);
 
         }
-        public async Task<int> UpdateSave(CommonProperty entity=null,long? modifier_user_id=null)
+        public async Task<int> UpdateSave(CommonProperty entity = null, long? modifier_user_id = null)
         {
-            if(entity!=null) entity.Modify((long)modifier_user_id);
-            int save = await SaveChangesAsync(); 
+            if (entity != null) entity.Modify((long)modifier_user_id);
+            int save = await SaveChangesAsync();
             return save;
 
         }
@@ -183,7 +188,7 @@ namespace SRLCore.Model
         public virtual DbSet<TUser> Users { get; set; }
         public virtual DbSet<TRole> Roles { get; set; }
         public virtual DbSet<TUserRole> UserRoles { get; set; }
-        
+
         public DbEntity(DbContextOptions<TDb> options)
          : base(options)
         {
@@ -205,7 +210,7 @@ namespace SRLCore.Model
             return GetUsers(request.id);
 
         }
-        public virtual async Task<TUser> GetUser(long id, string username=null)
+        public virtual async Task<TUser> GetUser(long id, string username = null)
         => await Users.FirstOrDefaultAsync(item => item.id == id || (item.username == username));
 
 
@@ -268,8 +273,8 @@ namespace SRLCore.Model
         public void Modify(long modifier_user_id)
         {
             modifier_id = modifier_user_id;
-            modify_date= DateTime.Now;
-        } 
+            modify_date = DateTime.Now;
+        }
 
     }
 
@@ -304,7 +309,7 @@ namespace SRLCore.Model
          new string[] { nameof(creator_id), nameof(create_date), nameof(status), nameof(first_name), nameof(last_name), nameof(mobile), nameof(password_hash), nameof(password_salt) };
 
 
-        public void SetAdminSeed(string user_name=null, string pass = null)
+        public void SetAdminSeed(string user_name = null, string pass = null)
         {
             creator_id = 1;
             create_date = DateTime.Now;
@@ -348,7 +353,7 @@ namespace SRLCore.Model
         public static void ThrowIfNotExist(this CommonProperty existingEntity)
         { if (existingEntity == null) throw new GlobalException(SRLCore.Model.ErrorCode.ItemNotExists); }
 
-        public static void ThrowConflictIfExist(this CommonProperty existingEntity, string message=null)
+        public static void ThrowConflictIfExist(this CommonProperty existingEntity, string message = null)
         { if (existingEntity != null) throw new GlobalException(SRLCore.Model.ErrorCode.AddRepeatedEntity, message); }
 
 
