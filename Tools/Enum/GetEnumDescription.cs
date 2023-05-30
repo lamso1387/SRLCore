@@ -8,6 +8,7 @@ namespace SRLCore.Tools
     {
         public static string GetEnumDescription<ClassType>(ClassType enum_value)
         {
+            if (enum_value == null) return null;
             DescriptionAttribute[] attributes = (DescriptionAttribute[])enum_value.GetType().GetField(enum_value.ToString()).GetCustomAttributes(typeof(DescriptionAttribute), false);
             return attributes.Length > 0 ? attributes[0].Description : string.Empty;
         }
