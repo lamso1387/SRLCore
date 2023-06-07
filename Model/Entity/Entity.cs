@@ -172,7 +172,7 @@ namespace SRLCore.Model
             int save = await SaveChangesAsync();
             return save;
 
-        }
+        } 
         public async Task Save()
         {
             int save = await SaveChangesAsync();
