@@ -38,8 +38,8 @@ namespace SRLCore.Middleware
         where TUser : IUser where TRole : IRole where TUserRole : IUserRole
         where Tcontext : DbEntity<Tcontext, TUser, TRole, TUserRole>
     {
-        public virtual string[] no_auth_actions => new string[] { "" };
-        public virtual string[] no_access_actions => new string[] { "" };
+        public virtual string[] ignore_authenticaton_actions => new string[] { "" };
+        public virtual string[] ignore_access_control_actions => new string[] { "" };
         public virtual bool check_user_first_login => false;
         public abstract DotNetCoreVersion dotnet_core_version { get; }
 
@@ -60,7 +60,7 @@ namespace SRLCore.Middleware
                 string action = null;
                 try
                 {
-                    bool need_auth = context.NeedAuth(no_auth_actions, ref action);
+                    bool need_auth = context.NeedAuth(ignore_authenticaton_actions, ref action);
                     context.Request.EnableBuffering();
                     using (var reader = new StreamReader(
                         context.Request.Body,
@@ -97,17 +97,21 @@ namespace SRLCore.Middleware
                         if (check_user_first_login && (user.change_pass_next_login == null ? false : (bool)user.change_pass_next_login))
                             throw new GlobalException(ErrorCode.PreconditionFailed, MessageText.PasswordMustBeChanged);
 
-                        context.Session.SetString("Id", user.id.ToString());
-                        context.Session.SetString("UserData", Newtonsoft.Json.JsonConvert.SerializeObject(user));
+                        //context.Session.SetString("Id", user.id.ToString());
+                        //context.Session.SetString("UserData", Newtonsoft.Json.JsonConvert.SerializeObject(user));
 
-                        bool need_access = context.NeedAccess(no_access_actions, action);
+                        context.Items["Id"]= user.id.ToString();
+                        context.Items["UserData"]= Newtonsoft.Json.JsonConvert.SerializeObject(user);
+                        
+                        bool need_access = context.NeedAccess(ignore_access_control_actions, action);
                         bool has_authority = false;
                         List<string> user_accesses = new List<string>();
                         if (action != "authenticate") has_authority = _userService.Authorization(action, user.id, out user_accesses);
 
                         if (has_authority == false && need_access) throw new GlobalException(ErrorCode.Forbidden);
 
-                        context.Session.SetString("Accesses", Newtonsoft.Json.JsonConvert.SerializeObject(user_accesses));
+                        //context.Session.SetString("Accesses", Newtonsoft.Json.JsonConvert.SerializeObject(user_accesses));
+                        context.Items["Accesses"]= Newtonsoft.Json.JsonConvert.SerializeObject(user_accesses);                        
 
                         var claims = new[] {
                 new Claim(ClaimTypes.NameIdentifier, user.id.ToString()),

@@ -20,9 +20,10 @@ namespace SRLCore.Controllers
         protected readonly Tcontext Db;
 
         protected Services.UserService<Tcontext, TUser, TRole, TUserRole> _userService;
-        public long user_session_id => long.Parse(HttpContext.Session.GetString("Id"));
-        public TUser user_session => Newtonsoft.Json.JsonConvert.DeserializeObject<TUser>(HttpContext.Session.GetString("UserData"));
-
+        //public long user_session_id => long.Parse(HttpContext.Session.GetString("Id"));
+        public long user_session_id => long.Parse(HttpContext.Items["Id"].ToString());
+        //public TUser user_session => Newtonsoft.Json.JsonConvert.DeserializeObject<TUser>(HttpContext.Session.GetString("UserData"));
+        public TUser user_session => Newtonsoft.Json.JsonConvert.DeserializeObject<TUser>(HttpContext.Items["UserData"].ToString());
 
         public CommonController(IDistributedCache distributedCache,
         ILogger<CommonController<Tcontext, TUser, TRole, TUserRole>> logger, Tcontext dbContext,

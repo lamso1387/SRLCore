@@ -11,7 +11,7 @@ using System.Threading;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Routing;
-using System.ComponentModel; 
+using System.ComponentModel;
 using SRLCore.Model;
 
 namespace SRLCore.Controllers
@@ -31,7 +31,7 @@ namespace SRLCore.Controllers
 
         public UserController(IDistributedCache distributedCache,
             ILogger<UserController<Tcontext, TUser, TRole, TUserRole, TAddUserRequest>> logger, Tcontext dbContext,
-            SRLCore.Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
+            Services.UserService<Tcontext, TUser, TRole, TUserRole> userService)
              : base(distributedCache, logger, dbContext, userService)
         {
 
@@ -46,10 +46,7 @@ namespace SRLCore.Controllers
 
             if (user == null)
                 throw new Middleware.GlobalException(ErrorCode.Unauthorized);
-
             List<string> user_accesses = UserSession.GetAccesses(Db, user.id);
-
-
             var user_data = UserSessionData(user);
 
             Dictionary<string, object> Session = new Dictionary<string, object>
@@ -236,7 +233,7 @@ namespace SRLCore.Controllers
         public async Task<IActionResult> ChangePasswordUser([FromBody] TAddUserRequest request)
         {
             SingleResponse<object> response = new SingleResponse<object>();
-              
+
             var entity = RequestToEntity(request);
             entity.id = user_session_id;
 
@@ -244,12 +241,12 @@ namespace SRLCore.Controllers
             existingEntity.ThrowIfNotExist();
 
             existingEntity.password = entity.password;
-              
+
             existingEntity.UpdatePasswordHash();
 
-            int save = await Db.UpdateSave(existingEntity, user_session_id); 
+            int save = await Db.UpdateSave(existingEntity, user_session_id);
 
-            return response.ToResponse(entity,entity.Selector);
+            return response.ToResponse(entity, entity.Selector);
         }
 
         [HttpGet("{id}")]
