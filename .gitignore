@@ -5,6 +5,7 @@
 project.lock.json
 .DS_Store
 *.pyc
+nupkg/
 
 # Visual Studio Code
 .vscode
@@ -26,10 +27,12 @@ build/
 bld/
 [Bb]in/
 [Oo]bj/
+[Oo]ut/
 msbuild.log
 msbuild.err
 msbuild.wrn
 
 # Visual Studio 2015
 .vs/
+
 package_api_key.txt

@@ -1,0 +1,86 @@
+﻿version: '3'
+services:
+  barnameapi: 
+   build: 
+    context: . 
+    dockerfile: Dockerfile
+   container_name: barnameapi
+   ports:
+    - "5000:5000"
+   networks:
+      - default
+# -----------------------------
+# redis database
+# -----------------------------
+  redis:
+    hostname: redis
+    container_name: redis
+    restart: unless-stopped
+    volumes:
+      - /dockervolumes/redis/data:/data
+    image: redis
+    ports:
+      - "6379:6379"
+    networks:
+      - default
+# -----------------------------
+# redis UI
+# -----------------------------
+  redis-commander:
+    hostname: redis-commander
+    container_name: redis-commander
+    image: rediscommander/redis-commander:latest
+    restart: always
+    environment:
+      - REDIS_HOSTS=local:redis:6379
+    ports:
+      - "9251:8081"
+    networks:
+      - default
+# -----------------------------
+# adminer ui
+# -----------------------------
+  adminer:
+    container_name: adminer
+    image: adminer
+    restart: unless-stopped
+    ports:
+      - 1200:8080
+    networks:
+      - default
+# -----------------------------
+# nginx
+# -----------------------------
+  nginx: 
+    build: ./nginx 
+    container_name: nginx
+    restart: unless-stopped
+    ports:
+      - 8070:80
+    volumes:
+      - /dockervolumes/nginx/var/www:/var/www
+      - /dockervolumes/nginx/etc/nginx/conf.d/:/etc/nginx/conf.d/
+    networks:
+      - default
+# -----------------------------
+# nginx proxy manager
+# -----------------------------
+  nginxproxymanager:
+    image: 'jc21/nginx-proxy-manager:latest'
+    container_name: nginxproxymanager
+    restart: unless-stopped
+    ports:
+      - '80:80'
+      - '81:81'
+      - '443:443'
+    volumes:
+      - /dockervolumes/nginxproxymanager/data:/data
+      - /dockervolumes/nginxproxymanager/etc/letsencrypt:/etc/letsencrypt
+    networks:
+      - default
+# -----------------------------
+# networks
+# -----------------------------
+networks:
+  default:
+     name: ibaarnetwork
