@@ -64,6 +64,10 @@ namespace SRLCore.Model
                 query.Skip(0);
 
         }
+        public static IQueryable<TModel> PagingLimited<TModel>(this IQueryable<TModel> query, PagedResponse<object> response, int pageStart = 0, int pageSize = 0, int maxSize=10) where TModel : class
+        {
+            return Paging<TModel>(query, response, pageStart ==0 ? 1: pageStart, pageSize>maxSize || pageSize==0 ? maxSize: pageSize);
+        }
         public static IQueryable<T> FilterNonActionAccess<T>(this IQueryable<T> query, string my_id, Func<IQueryable<T>, IQueryable<T>> MyUnionFunc)
         {
             IQueryable<T> data_to_union = null;
